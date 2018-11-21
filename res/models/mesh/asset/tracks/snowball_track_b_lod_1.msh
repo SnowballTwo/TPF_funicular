@@ -1,0 +1,98 @@
+function data()
+return {
+	matConfigs = {
+		{ 0, 0, 0, }, { 1, 1, 1, }, 
+	},
+	subMeshes = {
+		{
+			indices = {
+				normal = {
+					count = 60,
+					offset = 1444,
+				},
+				position = {
+					count = 60,
+					offset = 1384,
+				},
+				tangent = {
+					count = 60,
+					offset = 1264,
+				},
+				uv0 = {
+					count = 60,
+					offset = 1324,
+				},
+			},
+			materials = {
+				"asset/tracks/holz/snowball_track_ballast.mtl", "asset/tracks/beton/snowball_track_ballast.mtl", 
+			},
+		}, {
+			indices = {
+				normal = {
+					count = 144,
+					offset = 1936,
+				},
+				position = {
+					count = 144,
+					offset = 1792,
+				},
+				tangent = {
+					count = 144,
+					offset = 1504,
+				},
+				uv0 = {
+					count = 144,
+					offset = 1648,
+				},
+			},
+			materials = {
+				"asset/tracks/holz/snowball_track_rail.mtl", "asset/tracks/beton/snowball_track_rail.mtl", 
+			},
+		}, {
+			indices = {
+				normal = {
+					count = 72,
+					offset = 2296,
+				},
+				position = {
+					count = 72,
+					offset = 2224,
+				},
+				tangent = {
+					count = 72,
+					offset = 2080,
+				},
+				uv0 = {
+					count = 72,
+					offset = 2152,
+				},
+			},
+			materials = {
+				"asset/tracks/holz/snowball_track_sleeper.mtl", "asset/tracks/beton/snowball_track_sleeper.mtl", 
+			},
+		}, 
+	},
+	vertexAttr = {
+		normal = {
+			count = 180,
+			numComp = 3,
+			offset = 1084,
+		},
+		position = {
+			count = 420,
+			numComp = 3,
+			offset = 664,
+		},
+		tangent = {
+			count = 384,
+			numComp = 4,
+			offset = 0,
+		},
+		uv0 = {
+			count = 280,
+			numComp = 2,
+			offset = 384,
+		},
+	},
+}
+end

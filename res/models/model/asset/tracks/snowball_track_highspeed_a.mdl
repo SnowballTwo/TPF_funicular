@@ -1,0 +1,58 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 4.0, 2.0, 0.53, },
+		bbMin = { 0.0, 0.0, -0.0094, },
+	},
+	collider = {
+		params = {
+			
+		},
+		type = "MESH",
+	},
+	lods = {
+		{
+			children = {
+				{
+					id = "asset/tracks/snowball_track_a_lod_0.msh",
+					transf = {
+						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
+					},
+					type = "MESH",
+				}, 
+			},
+			matConfigs = {
+				{ 1, }, 
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 250,
+		}, {
+			children = {
+				{
+					id = "asset/tracks/snowball_track_a_lod_1.msh",
+					transf = {
+						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
+					},
+					type = "MESH",
+				}, 
+			},
+			matConfigs = {
+				{ 1, }, 
+			},
+			static = false,
+			visibleFrom = 250,
+			visibleTo = 2500,
+		}, 
+	},
+	metadata = {
+		availability = {
+			yearFrom = 0,
+			yearTo = 0,
+		},
+		cost = {
+			price = 0,
+		},
+	},
+}
+end

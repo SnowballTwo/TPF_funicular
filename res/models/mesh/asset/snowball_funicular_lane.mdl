@@ -1,0 +1,75 @@
+local funicular = require "snowball_funicular"
+
+function data()
+    return {
+        boundingInfo = {
+            bbMax = {0.01, 0.01, 0.01},
+            bbMin = {-0.01, -0.01, -0.01}
+        },
+        collider = {
+            params = {
+                center = {0.0, 0, 0.0},
+                halfExtents = {0.01, 0.01, 0.01}
+            },
+            type = "BOX"
+        },
+        lods = {
+            {
+                children = {
+                    {
+                        id = "asset/rock_2_9_lod_0.msh",
+                        transf = {
+                            .01,
+                            0,
+                            0,
+                            0,
+                            0,
+                            .01,
+                            0,
+                            0,
+                            0,
+                            0,
+                            .01,
+                            0,
+                            0,
+                            0,
+                            0,
+                            1
+                        },
+                        type = "MESH"
+                    }
+                },
+                matConfigs = {
+                    {0}
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 2500
+            }
+        },
+        metadata = {
+            transportNetworkProvider = {
+                laneLists = {
+                    {
+                        transportModes = {"TRAIN", "ELECTRIC_TRAIN"},
+                        
+                        nodes = {
+                            {{0.0, 0.0, 0}, {1.0, 0.0, 0}, 3.0},
+                            {{1.0, 0.0, 0}, {1.0, 0.0, 0}, 3.0},                            
+                        },
+                        inNodes = {0, 2},
+                        outNodes = {1, 3},
+                        speedLimit = 120 / 3.6,
+                    }
+                }
+            },
+            availability = {
+                yearFrom = 0,
+                yearTo = 0
+            },
+            cost = {
+                price = 0
+            }
+        }
+    }
+end

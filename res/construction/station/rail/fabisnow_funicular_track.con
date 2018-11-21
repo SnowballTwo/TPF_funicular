@@ -1,0 +1,257 @@
+local funicular = require "snowball_funicular"
+local vec2 = require "snowball_funicular_vec2"
+local vec3 = require "snowball_funicular_vec3"
+local directions = {1, 0, -1}
+
+function data()
+    return {
+        type = "RAIL_STATION",
+        description = {
+            name = _("Truck station"),
+            description = _("Truck station with two cargo terminals.")
+        },
+        availability = {},
+        order = 1000,
+        params = {
+            {
+                key = "snowball_funicular_direction",
+                name = _("snowball_funicular_direction"),
+                values = {_("left"), _("straight"), _("right")},
+                defaultIndex = 1
+            },
+            {
+                key = "snowball_funicular_radius_100",
+                name = _("snowball_funicular_radius_100"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 2
+            },
+            {
+                key = "snowball_funicular_radius_10",
+                name = _("snowball_funicular_radius_10"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_funicular_length_100",
+                name = _("snowball_funicular_length_100"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 1
+            },
+            {
+                key = "snowball_funicular_length_10",
+                name = _("snowball_funicular_length_10"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_funicular_slope_10",
+                name = _("snowball_funicular_slope_10"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 2
+            },
+            {
+                key = "snowball_funicular_slope_1",
+                name = _("snowball_funicular_slope_1"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+                defaultIndex = 0
+            },           
+            
+        },
+        updateFn = function(params)
+            local result = {
+                models = {}
+            }
+
+            local width = 10
+            local prewidth = 20
+            local length = math.max(50, 100 * (params.snowball_funicular_length_100) + 10 * (params.snowball_funicular_length_10))
+            local slope = 0.1 * (params.snowball_funicular_slope_10) + 0.01 * (params.snowball_funicular_slope_1)
+            local radius = math.max(10, 100 * (params.snowball_funicular_radius_100) + 10 * (params.snowball_funicular_radius_10))
+            local direction = directions[params.snowball_funicular_direction + 1]
+            
+            local up = length * slope
+            local height = params.state.track.railBase + params.state.track.railHeight
+            
+
+            local k = 0.5528
+            local angle = length / radius
+              
+            local d = {(math.cos(angle) * radius - radius) * direction, math.sin(angle) * radius, up}            
+            local dne = vec3.normalize({-math.sin(angle) * direction, math.cos(angle), 0})
+
+            if (direction == 0) then
+                d = {0, length, up}  
+                dne = {0, 1, 0}  
+            end
+
+            local dn = {dne[2], -dne[1], 0}
+            local e = vec3.add(d, vec3.mul(prewidth, dne))
+
+            local pre_snap = {0.0, -prewidth, 0 }
+            local pre_start = {0.0, 0.0, 0}
+            local pre_vec = {0.0, prewidth, 0.0}
+
+            local post_start = {d[1], d[2], up}
+            local post_snap = {e[1], e[2], up}
+            local post_vec = vec3.mul(prewidth, dne)
+
+            result.edgeLists = {
+                {
+                    type = "TRACK",
+                    params = {
+                        catenary = false,
+                        type = "standard.lua"
+                    },
+                    edges = {
+                        {pre_snap, pre_vec},
+                        {pre_start, pre_vec}
+                    },
+                    snapNodes = {0}
+                },
+                {
+                    type = "TRACK",
+                    params = {
+                        catenary = false,
+                        type = "standard.lua"
+                    },
+                    edges = {
+                        {post_start, post_vec},
+                        {post_snap, post_vec}
+                    },
+                    snapNodes = {1}
+                }
+            }
+            local parts = math.round( length / funicular.segmentLength)
+            local zcurve =
+                funicular.deCasteljau(
+                {0, 0},
+                {length * 0.2, 0},
+                {length - length * 0.2, up},
+                {length, up},
+                parts
+            )
+            local ecurve = nil
+
+            if direction == 0 then
+                ecurve = funicular.lineSegment({0.0,0.0,0.0}, {0.0, length, 0.0}, parts)
+            else
+                ecurve = funicular.arcSegment(radius, {-radius * direction, 0}, angle, direction, parts)
+            end
+
+            local faces = {}
+            faces[#faces + 1] = {
+                {-0.5 * width, -prewidth, 0},
+                {-0.5 * width, 0, 0},
+                {0.5 * width, 0, 0},
+                {0.5 * width, -prewidth, 0}
+            }
+
+            local left = {}
+            local right = {}
+            local ballast_width = params.state.track.sleeperWidth - .6
+            
+            print("ballast: "..ballast_width)
+            print("ecurve: "..funicular.dump(ecurve))
+            print("dn: "..funicular.dump(dn))
+            print("dne: "..funicular.dump(dne))
+
+            for i = 1, #ecurve - 1 do
+              
+                local p1 = ecurve[i]
+                local p2 = ecurve[i + 1] 
+
+                p1[3] = zcurve[i][2]
+                p2[3] = zcurve[i + 1][2]
+               
+                local n1 = nil
+                if i == 1 then
+                    n1 = funicular.getNormal(p1, pre_snap, nil)
+                else
+                    n1 = funicular.getNormal(p1, ecurve[i - 1], ecurve[i + 1])
+                end
+                local n2 = nil
+                if i == #ecurve - 1 then
+                    n2 = funicular.getNormal(p2, nil, post_snap)
+                else
+                    n2 = funicular.getNormal(p2, p1, ecurve[i + 2])
+                end
+
+                n1[3] = 0
+                n2[3] = 0
+                               
+                left[#left + 1] = vec3.add(p1, vec3.mul(-1 * ballast_width, n1))
+                right[#right + 1] = vec3.add(p1, vec3.mul(1 * ballast_width, n1))
+
+                if i == #ecurve -1 then
+                    left[#left + 1] = vec3.add(p2, vec3.mul(-1 * ballast_width, n2))
+                    right[#right + 1] = vec3.add(p2, vec3.mul(1 * ballast_width, n2))
+                end
+                                
+                funicular.buildSegment(                    
+                    {p1[1], p1[2], p1[3] + height},
+                    {p2[1], p2[2], p2[3] + height}, "asset/snowball_funicular_lane.mdl", {1, 1, 1}, result)
+
+                funicular.buildWideSegment(                    
+                    {p1[1], p1[2], p1[3]},
+                    {p2[1], p2[2], p2[3]},
+                    n1,
+                    n2,
+                    "asset/tracks/snowball_track_standard_a.mdl",
+                    "asset/tracks/snowball_track_standard_b.mdl",
+                    { ballast_width * 2, funicular.segmentLength, 1},
+                    result
+                )
+
+                faces[#faces + 1] = {
+                    vec3.add(p1, vec3.mul(-0.5 * width, n1)),
+                    vec3.add(p2, vec3.mul(-0.5 * width, n2)),
+                    vec3.add(p2, vec3.mul(0.5 * width, n2)),
+                    vec3.add(p1, vec3.mul(0.5 * width, n1))
+                }
+            end
+           
+            faces[#faces + 1] = {
+                vec3.add(d, vec3.mul(-0.5 * width, dn)),
+                vec3.add(e, vec3.mul(-0.5 * width, dn)),
+                vec3.add(e, vec3.mul(0.5 * width, dn)),
+                vec3.add(d, vec3.mul(0.5 * width, dn))
+            }
+         
+            result.terrainAlignmentLists = {
+                {
+                    type = "EQUAL",
+                    faces = faces,
+                    slopeLow = 1,
+                    slopeHigh = 1
+                }
+            }
+            
+            local ground = {}
+            for i = 1, #right do
+                ground[#ground + 1] = right[i]
+            end
+        
+            for i = 1, #left do
+                ground[#ground + 1] = left[#left - i + 1]
+            end
+           
+            result.groundFaces = {
+                {
+                    face = ground,
+                    modes = {                       
+                        {
+                            type = "STROKE_OUTER",
+                            key = "ballast"
+                        },
+                        {
+                            type = "FILL",
+                            key = "ballast_fill"
+                        }                          
+                    }
+                }                         
+            }
+
+            return result
+        end
+    }
+end
