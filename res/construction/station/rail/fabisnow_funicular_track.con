@@ -1,3 +1,4 @@
+local colliderutil = require "colliderutil"
 local funicular = require "snowball_funicular"
 local vec2 = require "snowball_funicular_vec2"
 local vec3 = require "snowball_funicular_vec3"
@@ -234,7 +235,7 @@ function data()
             for i = 1, #left do
                 ground[#ground + 1] = left[#left - i + 1]
             end
-           
+            result.colliders = { colliderutil.createPointCloud(ground) }
             result.groundFaces = {
                 {
                     face = ground,
