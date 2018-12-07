@@ -1,0 +1,129 @@
+local funicular = require "snowball_funicular"
+local colliderutil = require "colliderutil"
+local constructionutil = require "constructionutil"
+local vec2 = require "snowball_funicular_vec2"
+local vec3 = require "snowball_funicular_vec3"
+local mat3 = require "snowball_funicular_mat3"
+local polygon = require "snowball_funicular_polygon"
+local spline = require "snowball_funicular_spline"
+local vec4 = require "vec4"
+local transf = require "transf"
+
+function data()
+	return {
+		type = "RAIL_STATION",
+		availability = {
+			yearFrom = 244,
+			yearTo = 245
+		},
+		description = {
+			name = _("patch_title"),
+			description = _("patch_description")
+		},
+		order = 197720202,
+		skipCollision = false,
+		autoRemovable = false,
+		updateFn = function(params)
+			local result = {
+				models = {},
+				cost = 10,
+				bulldozeCost = 10,
+				maintenanceCost = 0
+			}
+
+			result.terrainAlignmentLists = {
+				{
+					type = "EQUAL",
+					faces = {}
+				}
+			}
+
+			local values = params.values
+
+			if not values or not params.forReal then
+				result.models[#result.models + 1] = {
+					id = "asset/snowball_funicular_suspensor.mdl",
+					transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+				}
+				return result
+			end
+
+			result.edgeLists = {}
+
+			for i = 1, #values.edges do
+				local direction = vec3.sub(values.edges[i][2], values.edges[i][1])
+
+				if (i == 1) then
+					result.edgeLists[#result.edgeLists + 1] = {
+						type = "TRACK",
+						params = {
+							catenary = false,
+							type = funicular.trackTypeToConfig(values.edges[i].type) .. ".lua"
+						},
+						edges = {
+							{values.edges[i][1], direction},
+							{values.edges[i][2], direction}
+						},
+						snapNodes = {0}
+					}
+				elseif (i == #values.edges) then
+					result.edgeLists[#result.edgeLists + 1] = {
+						type = "TRACK",
+						params = {
+							catenary = false,
+							type = funicular.trackTypeToConfig(values.edges[i].type) .. ".lua"
+						},
+						edges = {
+							{values.edges[i][1], direction},
+							{values.edges[i][2], direction}
+						},
+						snapNodes = {1}
+					}
+				else
+					funicular.buildTrack(
+						spline.linearByLength(values.edges[i][1], values.edges[i][2], funicular.segmentLength),
+						direction,
+						direction,
+						values.edges[i].type,
+						values.edges[i].rack,
+						result
+					)
+				end
+
+				--[[if i < #values.edges then
+					local edge1 = values.edges[i]
+					local direction1 = vec3.normalize(vec3.sub(edge1[2], edge1[1]))
+					local edge2 = values.edges[i + 1]
+					local direction2 = vec3.normalize(vec3.sub(edge2[2], edge2[1]))
+
+					local a = values.edges[i][2]
+					local b = values.edges[i + 1][1]
+
+					result.edgeLists[#result.edgeLists + 1] = {
+						type = "TRACK",
+						params = {
+							catenary = false,
+							type = funicular.trackTypeToConfig(values.edges[i].type) .. ".lua"
+						},
+						edges = {
+							{values.edges[i][2], vec3.mul(vec3.length(vec3.sub(b,a)), direction1)},
+							{values.edges[i + 1][1], vec3.mul(vec3.length(vec3.sub(b,a)), direction2)}
+						},
+						snapNodes = {}
+					}
+				end]]
+			end
+
+			for i = 1, #values.segments do
+				local segment = values.segments[i]
+				local edge1 = values.edges[i]
+				local direction1 = vec3.normalize(vec3.sub(edge1[2], edge1[1]))
+				local edge2 = values.edges[i + 1]
+				local direction2 = vec3.normalize(vec3.sub(edge2[2], edge2[1]))
+
+				funicular.buildTrack(segment.points, direction1, direction2, segment.type, segment.rack, result)
+			end
+			return result
+		end
+	}
+end

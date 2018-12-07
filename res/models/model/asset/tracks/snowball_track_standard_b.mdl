@@ -26,7 +26,7 @@ return {
 			},
 			static = false,
 			visibleFrom = 0,
-			visibleTo = 250,
+			visibleTo = 750,
 		}, {
 			children = {
 				{
@@ -41,7 +41,7 @@ return {
 				{ 0, }, 
 			},
 			static = false,
-			visibleFrom = 250,
+			visibleFrom = 750,
 			visibleTo = 2500,
 		}, 
 	},

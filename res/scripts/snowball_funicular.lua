@@ -1,30 +1,23 @@
+local colliderutil = require "colliderutil"
+local constructionutil = require "constructionutil"
 local vec2 = require "snowball_funicular_vec2"
 local vec3 = require "snowball_funicular_vec3"
 local mat3 = require "snowball_funicular_mat3"
 local polygon = require "snowball_funicular_polygon"
+local spline = require "snowball_funicular_spline"
 local vec4 = require "vec4"
 local transf = require "transf"
 
 local funicular = {}
 
-local function compareByCount(a, b)
-    return a.count < b.count
-end
-
-local function compareByDistance(a, b)
-    return a.distance < b.distance
-end
-
 funicular.segmentLength = 2
+funicular.segmentWidth = 4
+funicular.segmentHeight = 0.3 + 0.08 + 0.15
+
+funicular.trackTypeWood = 0
+funicular.trackTypeConcrete = 1
 
 funicular.radius = 100
-
-funicular.trackTrans = {
-    0,                            1,                            0,                            0,
-    1,                            0,                            0,                            0,
-    0,                            0,                            1,                            0,
-    0.5 * funicular.segmentLength,                            0,                            0,                            1
-}
 
 function funicular.dump(o)
     if type(o) == "table" then
@@ -41,186 +34,12 @@ function funicular.dump(o)
     end
 end
 
-function funicular.getObjects()
-    local entities =
-        game.interface.getEntities({pos = {0, 0}, radius = 900000}, {type = "ASSET_GROUP", includeData = true})
-
-    local finishers = {}
-    local markers = {}
-
-    if entities then
-        for id, data in pairs(entities) do           
-            local markercount = data.models["asset/snowball_funicular_marker.mdl"] or 0
-
-            if markercount > 0 then
-                markers[#markers + 1] = data
-                markers[#markers].count = markercount
-            end
-
-            local finishercount = data.models["asset/snowball_funicular_finisher.mdl"] or 0
-            if finishercount > 0 then
-                finishers[#finishers + 1] = data
-            end
-        end
-    end
-
-    table.sort(markers, compareByCount)
-
-    return {markers = markers, finishers = finishers}
-end
-
-function funicular.getBuildingConnectionPoints(point)
-    local entities =
-        game.interface.getEntities({pos = point, radius = 200}, {type = "CONSTRUCTION", includeData = true})
-    local connectionPoints = {}
-
-    if entities then
-        for id, data in pairs(entities) do
-            
-            if (data.fileName and (data.fileName == "depot/snowball_funicular_depot.con")) or
-                (data.fileName and (data.fileName == "station/street/snowball_funicular_station.con"))
-             then              
-                connectionPoints[#connectionPoints + 1] = data
-                connectionPoints[#connectionPoints].position = {data.transf[13], data.transf[14], data.transf[15]}
-                connectionPoints[#connectionPoints].distance = vec2.length(vec2.sub(data.position, point))               
-            end
-        end
-    end
-
-    table.sort(connectionPoints, compareByDistance)
-
-    return connectionPoints
-end
-
-local function normalizeAngle(angle)
-    local result = angle
-    while result > math.pi do
-        result = result - math.pi
-    end
-
-    while result < -math.pi do
-        result = result + math.pi
-    end
-    return result
-end
-
-function funicular.getPoints(markers)
-    local result = {}
-
-    for i = 1, #markers do
-        result[#result + 1] = markers[i].position
-    end
-
-    return result
-end
-
-function funicular.getNormals(points)
-    local result = {}
-
-    for i = 1, #points do
-        local normal = {0, 0}
-
-        if i > 1 then
-            local ortho =
-                vec2.normalize {
-                points[i][2] - points[i - 1][2],
-                points[i][1] - points[i - 1][1]
-            }
-
-            normal[1] = normal[1] + ortho[1]
-            normal[2] = normal[2] - ortho[2]
-        end
-        if i < #points then
-            local ortho =
-                vec2.normalize {
-                points[i + 1][2] - points[i][2],
-                points[i + 1][1] - points[i][1]
-            }
-
-            normal[1] = normal[1] + ortho[1]
-            normal[2] = normal[2] - ortho[2]
-        end
-
-        local normal = vec2.normalize(normal)
-
-        if i > 1 and i < #points then
-            local a = vec2.sub(points[i], points[i - 1])
-            local b = vec2.sub(points[i + 1], points[i])
-            local cosa = vec2.dot(a, b) / (vec2.length(a) * vec2.length(b))
-
-            if (cosa > -1 and cosa < 1) then
-                local an = math.acos(cosa)
-                local angle = 0.5 * math.abs(normalizeAngle(an))
-
-                normal[1] = normal[1] / math.cos(angle)
-                normal[2] = normal[2] / math.cos(angle)
-            end
-        end
-
-        result[#result + 1] = normal
-    end
-
-    return result
-end
-
-function funicular.getOutline(points, normals, width)
-    local polygon = {}
-    local right = {}
-    local left = {}
-
-    for i = 1, #points do
-        local normal = normals[i]
-
-        right[#right + 1] = {
-            points[i][1] + 0.5 * width * normal[1],
-            points[i][2] + 0.5 * width * normal[2],
-            points[i][3]
-        }
-        left[#left + 1] = {
-            points[i][1] - 0.5 * width * normal[1],
-            points[i][2] - 0.5 * width * normal[2],
-            points[i][3]
-        }
-    end
-
-    if #left < 2 or #right < 2 then
-        return nil
-    end
-
-    for i = 1, #right do
-        polygon[#polygon + 1] = right[i]
-    end
-
-    for i = 1, #left do
-        polygon[#polygon + 1] = left[#left - i + 1]
-    end
-
-    return polygon
-end
-
-function funicular.buildLane(point1, point2, result)
-   
-    local segment = vec3.sub(point2, point1)
-    local scalex = vec2.length(segment) * 0.01
-    local scalez = point2[3] - point1[3]
-    local rotz = math.atan2(segment[2], segment[1])
-    
-    local scale = transf.scale({x = scalex, y = 1, z = scalez})   
-    local rotTrans = transf.rotZTransl(rotz, {x = point1[1], y = point1[2], z = point1[3]})
-
-    result.models[#result.models + 1] = {
-        id = "asset/snowball_funicular_lane.mdl",
-        transf = transf.mul(rotTrans, scale)
-    }
-end
-
 function funicular.buildSegment(p1, p2, model, modelSize, result)
-    
-    local b1 = vec2.ortho(vec2.sub(p2, p1))  
+    local b1 = vec2.ortho(vec2.sub(p2, p1))
     local b2 = vec3.sub(p2, p1)
     b1[3] = 0
-   
-    local affine = mat3.affine({1,0,0}, {0,1 * modelSize[2],0}, {0,0,1}, b1, b2, {0,0,1})
+
+    local affine = mat3.affine({1, 0, 0}, {0, 1 * modelSize[2], 0}, {0, 0, 1}, b1, b2, {0, 0, 1})
 
     local localTransform =
         transf.new(
@@ -229,7 +48,7 @@ function funicular.buildSegment(p1, p2, model, modelSize, result)
         vec4.new(affine[1][3], affine[2][3], affine[3][3], .0),
         vec4.new(p1[1], p1[2], p1[3], 1.0)
     )
-    
+
     result.models[#result.models + 1] = {
         id = model,
         transf = localTransform
@@ -237,7 +56,6 @@ function funicular.buildSegment(p1, p2, model, modelSize, result)
 end
 
 function funicular.buildWideSegment(p1, p2, n1, n2, leftModel, rightModel, modelSize, result)
-    
     local left1 = vec3.add(p1, vec3.mul(-0.5 * modelSize[1], n1))
     local right1 = vec3.add(p1, vec3.mul(0.5 * modelSize[1], n1))
 
@@ -249,8 +67,8 @@ function funicular.buildWideSegment(p1, p2, n1, n2, leftModel, rightModel, model
     local b1 = n1
     local b2 = vec3.sub(left2, left1)
     b1[3] = 0
-   
-    local affine = mat3.affine({1,0,0}, {0,1 * modelSize[2],0}, {0,0,1}, b1, b2, {0,0,1})
+
+    local affine = mat3.affine({1, 0, 0}, {0, 1 * modelSize[2], 0}, {0, 0, 1}, b1, b2, {0, 0, 1})
 
     local transform =
         transf.new(
@@ -259,19 +77,19 @@ function funicular.buildWideSegment(p1, p2, n1, n2, leftModel, rightModel, model
         vec4.new(affine[1][3], affine[2][3], affine[3][3], .0),
         vec4.new(left1[1], left1[2], left1[3], 1.0)
     )
-    
+
     result.models[#result.models + 1] = {
         id = leftModel,
         transf = transform
     }
 
-     -- model with right angle in the lower left corner
+    -- model with right angle in the lower left corner
 
-    b1 = vec3.mul(-1, n2)  
+    b1 = vec3.mul(-1, n2)
     b2 = vec3.sub(right1, right2)
     b1[3] = 0
-   
-    affine = mat3.affine({1,0,0}, {0,1 * modelSize[2],0}, {0,0,1}, b1, b2, {0,0,1})
+
+    affine = mat3.affine({1, 0, 0}, {0, 1 * modelSize[2], 0}, {0, 0, 1}, b1, b2, {0, 0, 1})
 
     transform =
         transf.new(
@@ -280,59 +98,16 @@ function funicular.buildWideSegment(p1, p2, n1, n2, leftModel, rightModel, model
         vec4.new(affine[1][3], affine[2][3], affine[3][3], .0),
         vec4.new(right2[1], right2[2], right2[3], 1.0)
     )
-    
+
     result.models[#result.models + 1] = {
         id = leftModel,
         transf = transform
     }
-
-end
-
-function funicular.buildConnectionPoint(point, result)
-    result.models[#result.models + 1] = {
-        id = "asset/snowball_funicular_connection.mdl",
-        transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, point[1], point[2], point[3], 1}
-    }
-end
-
-function funicular.buildPylon(point, normal, model, result)
-    local rotz = math.atan2(normal[2], normal[1])
-    result.models[#result.models + 1] = {
-        id = model,
-        transf = transf.scaleRotZTransl(1, rotz, {x = point[1], y = point[2], z = point[3]})
-    }
-end
-
-function funicular.connectToBuilding(point, result)
-end
-
-function funicular.buildGround(point, normal, result)
-    local n = vec3.normalize({normal[1], normal[2], 0})
-
-    local p1 = vec3.add(point, vec3.add(vec3.mul(2, {n[2], -n[1], 0}), vec3.mul(2, n)))
-    local p2 = vec3.add(point, vec3.add(vec3.mul(2, {n[2], -n[1], 0}), vec3.mul(-2, n)))
-    local p3 = vec3.add(point, vec3.add(vec3.mul(-2, {n[2], -n[1], 0}), vec3.mul(-2, n)))
-    local p4 = vec3.add(point, vec3.add(vec3.mul(-2, {n[2], -n[1], 0}), vec3.mul(2, n)))
-
-    result.groundFaces[#result.groundFaces + 1] = {
-        face = {p1, p2, p3, p4},
-        modes = {
-            {
-                type = "FILL",
-                key = "town_concrete"
-            },
-            {
-                type = "STROKE_OUTER",
-                key = "town_concrete_border"
-            }
-        }
-    }
 end
 
 function funicular.getNormal(point, previous, next)
-
     local normal = {0, 0}
- 
+
     if previous then
         local ortho =
             vec2.normalize {
@@ -346,145 +121,407 @@ function funicular.getNormal(point, previous, next)
     if next then
         local ortho =
             vec2.normalize {
-                next[2] - point[2],
-                next[1] - point[1]
+            next[2] - point[2],
+            next[1] - point[1]
         }
 
         normal[1] = normal[1] + ortho[1]
         normal[2] = normal[2] - ortho[2]
     end
 
-    normal = vec2.normalize(normal)   
+    normal = vec2.normalize(normal)
     return normal
-
 end
 
 function funicular.deCasteljau(p0, p1, p2, p3, parts)
     local result = {}
-    
-    for i = 0, parts do
 
+    for i = 0, parts do
         local t = 1.0 / parts * i
-       
+
         local x =
-              t * t * t * (p0[1] * -1 + p1[1] *  3 + p2[1] * -3 + p3[1])
-            + t * t *     (p0[1] *  3 + p1[1] * -6 + p2[1] *  3)
-            + t *         (p0[1] * -3 + p1[1] *  3)
-            +              p0[1]   
- 
-          
+            t * t * t * (p0[1] * -1 + p1[1] * 3 + p2[1] * -3 + p3[1]) + t * t * (p0[1] * 3 + p1[1] * -6 + p2[1] * 3) +
+            t * (p0[1] * -3 + p1[1] * 3) +
+            p0[1]
+
         local y =
-              t * t * t * (p0[2] * -1 + p1[2] *  3 + p2[2] * -3 + p3[2])
-            + t * t *     (p0[2] *  3 + p1[2] * -6 + p2[2] *  3)
-            + t *         (p0[2] * -3 + p1[2] *  3)
-            +              p0[2] 
-      
-        result[#result + 1] = {x,y}
+            t * t * t * (p0[2] * -1 + p1[2] * 3 + p2[2] * -3 + p3[2]) + t * t * (p0[2] * 3 + p1[2] * -6 + p2[2] * 3) +
+            t * (p0[2] * -3 + p1[2] * 3) +
+            p0[2]
+
+        result[#result + 1] = {x, y}
     end
 
     return result
 end
 
 function funicular.arcSegment(radius, center, angle, direction, parts)
+    local da = angle / parts
+    local result = {}
 
-local da = angle / parts
-local result = {}
+    for i = 0, parts do
+        local a = i * da
+        result[#result + 1] = {math.cos(a) * radius * direction + center[1], math.sin(a) * radius + center[2]}
+    end
 
-for i = 0, parts do
-
-    local a = i * da
-    result[#result + 1] = {math.cos(a) * radius * direction + center[1], math.sin(a) * radius + center[2]}
-
-end
-
-return result
-
+    return result
 end
 
 function funicular.lineSegment(p1, p2, parts)
-   
     local result = {}
-    
+
     local x = p1[1]
     local y = p1[2]
     local z = p1[3]
 
     local p = 1.0 / parts
-    local dx = (p2[1] - p1[1]) * p 
-    local dy = (p2[2] - p1[2]) * p 
-    local dz = (p2[3] - p1[3]) * p 
-   
+    local dx = (p2[1] - p1[1]) * p
+    local dy = (p2[2] - p1[2]) * p
+    local dz = (p2[3] - p1[3]) * p
+
     for i = 0, parts do
-        result[#result + 1] = {x + i * dx, y + i * dy, z + i * dz}    
+        result[#result + 1] = {x + i * dx, y + i * dy, z + i * dz}
     end
-    
+
     return result
-    
-    end
-
-
-function funicular.getCurveSegment(segment, tension, partLength, result)
-    local length = vec2.length(vec2.sub(segment[2], segment[3]))
-
-    local m1x = (1 - tension) * (segment[3][1] - segment[1][1]) / 2
-    local m2x = (1 - tension) * (segment[4][1] - segment[2][1]) / 2
-
-    local m1y = (1 - tension) * (segment[3][2] - segment[1][2]) / 2
-    local m2y = (1 - tension) * (segment[4][2] - segment[2][2]) / 2
-
-    local parts = math.round(length / partLength)
-
-    for i = 1, parts - 1 do
-        local t = 1.0 / parts * i
-
-        local x =
-            (2 * t * t * t - 3 * t * t + 1) * segment[2][1] + (t * t * t - 2 * t * t + t) * m1x +
-            (-2 * t * t * t + 3 * t * t) * segment[3][1] +
-            (t * t * t - t * t) * m2x
-        local y =
-            (2 * t * t * t - 3 * t * t + 1) * segment[2][2] + (t * t * t - 2 * t * t + t) * m1y +
-            (-2 * t * t * t + 3 * t * t) * segment[3][2] +
-            (t * t * t - t * t) * m2y
-
-        result[#result + 1] = {x, y}
-    end
 end
-function funicular.getBezierCurve(points, tension, width)
+
+function funicular.trackTypeToConfig(type)
+    if type == funicular.trackTypeWood then
+        return "standard"
+    elseif type == funicular.trackTypeConcrete then
+        return "high_speed"
+    end
+
+    return "standard"
+end
+
+function funicular.buildTrack(points, startDirection, endDirection, type, rack, result)
+    local terrainFaces = {}
+    local colliderFaces = {}
+    local groundFaces = {}
+    local left = {}
+    local right = {}
+
+    for i = 1, #points - 1 do
+        local p1 = points[i]
+        local p2 = points[i + 1]
+
+        local n1 = nil
+        if i == 1 then
+            n1 = vec2.normalize(vec2.ortho(startDirection))
+        else
+            n1 = funicular.getNormal(p1, points[i - 1], points[i + 1])
+        end
+        local n2 = nil
+        if i == #points - 1 then
+            n2 = vec2.normalize(vec2.ortho(endDirection))
+        else
+            n2 = funicular.getNormal(p2, p1, points[i + 2])
+        end
+
+        n1[3] = 0
+        n2[3] = 0
+
+        left[#left + 1] = vec3.add(p1, vec3.mul(-0.5 * funicular.segmentWidth, n1))
+        right[#right + 1] = vec3.add(p1, vec3.mul(0.5 * funicular.segmentWidth, n1))
+
+        if i == #points - 1 then
+            left[#left + 1] = vec3.add(p2, vec3.mul(-0.5 * funicular.segmentWidth, n2))
+            right[#right + 1] = vec3.add(p2, vec3.mul(0.5 * funicular.segmentWidth, n2))
+        end
+
+        funicular.buildSegment(
+            {p1[1], p1[2], p1[3] + funicular.segmentHeight},
+            {p2[1], p2[2], p2[3] + funicular.segmentHeight},
+            "asset/snowball_funicular_lane.mdl",
+            {1, 1, 1},
+            result
+        )
+
+        if rack then
+            funicular.buildSegment(
+                {p1[1], p1[2], p1[3]},
+                {p2[1], p2[2], p2[3]},
+                "asset/tracks/snowball_track_rack.mdl",
+                {1, funicular.segmentLength, 1},
+                result
+            )
+        end
+
+        local trackConfig = funicular.trackTypeToConfig(type)
+
+        funicular.buildWideSegment(
+            {p1[1], p1[2], p1[3]},
+            {p2[1], p2[2], p2[3]},
+            n1,
+            n2,
+            "asset/tracks/snowball_track_" .. trackConfig .. "_a.mdl",
+            "asset/tracks/snowball_track_" .. trackConfig .. "_b.mdl",
+            {funicular.segmentWidth, funicular.segmentLength, 1},
+            result
+        )
+
+        terrainFaces[#terrainFaces + 1] = {
+            vec3.add(p1, vec3.mul(-funicular.segmentWidth, n1)),
+            vec3.add(p2, vec3.mul(-funicular.segmentWidth, n2)),
+            vec3.add(p2, vec3.mul(funicular.segmentWidth, n2)),
+            vec3.add(p1, vec3.mul(funicular.segmentWidth, n1))
+        }
+
+        colliderFaces[#colliderFaces + 1] = {
+            vec3.add(p1, vec3.mul(-0.8 * funicular.segmentWidth, n1)),
+            vec3.add(p2, vec3.mul(-0.8 * funicular.segmentWidth, n2)),
+            vec3.add(p2, vec3.mul(0.8 * funicular.segmentWidth, n2)),
+            vec3.add(p1, vec3.mul(0.8 * funicular.segmentWidth, n1))
+        }
+    end
+
+    for i = 1, #right do
+        groundFaces[#groundFaces + 1] = right[i]
+    end
+
+    for i = 1, #left do
+        groundFaces[#groundFaces + 1] = left[#left - i + 1]
+    end
+
+    if not result.terrainAlignmentLists then
+        result.terrainAlignmentLists = {}
+    end
+
+    result.terrainAlignmentLists[#result.terrainAlignmentLists + 1] = {
+        type = "EQUAL",
+        faces = terrainFaces,
+        slopeLow = 1,
+        slopeHigh = 1
+    }
+
+    if not result.colliders then
+        result.colliders = {}
+    end
+
+    for i = 1, #colliderFaces do
+        result.colliders[#result.colliders + 1] = colliderutil.createPointCloud(colliderFaces[i])
+    end
+
+    if not result.groundFaces then
+        result.groundFaces = {}
+    end
+
+    result.groundFaces[#result.groundFaces + 1] = {
+        face = groundFaces,
+        modes = {{type = "STROKE_OUTER", key = "ballast"}}
+    }
+    result.groundFaces[#result.groundFaces + 1] = {
+        face = constructionutil.reverseFace(groundFaces),
+        modes = {{type = "STROKE_OUTER", key = "ballast"}}
+    }
+end
+
+local function compareBySeed(a, b)
+    return tonumber(a.params.seed) < tonumber(b.params.seed)
+end
+
+function funicular.getStations()
+    local constructions =
+        game.interface.getEntities({pos = {0, 0}, radius = 900000}, {type = "CONSTRUCTION", includeData = true})
+    local stations = {}
+    for id, data in pairs(constructions) do
+        if data.fileName == "station/rail/snowball_funicular_planner.con" then
+            stations[#stations + 1] = data
+        end
+    end
+    table.sort(stations, compareBySeed)
+
+    return stations
+end
+
+function funicular.getValuesFromStations(stations)
+    if #stations < 2 then
+        return nil
+    end
+
+    local result = {
+        segments = {},
+        edges = {}
+    }
+
+    for i = 1, #stations - 1 do
+        local s1 = 20
+        local s2 = 20
+
+        local m1 = mat3.fromView(stations[i].transf)
+        local m2 = mat3.fromView(stations[i + 1].transf)
+
+        local p1 = {stations[i].transf[13], stations[i].transf[14], stations[i].transf[15]}
+        local slope1 =
+            stations[i].params.snowball_funicular_slope_10 * 10 + stations[i].params.snowball_funicular_slope_1
+        if stations[i].params.snowball_funicular_slope_sign > 0 then
+            slope1 = slope1 * -1
+        end
+
+        local p2 = {stations[i + 1].transf[13], stations[i + 1].transf[14], stations[i + 1].transf[15]}
+        local slope2 =
+            stations[i + 1].params.snowball_funicular_slope_10 * 10 + stations[i + 1].params.snowball_funicular_slope_1
+        if stations[i + 1].params.snowball_funicular_slope_sign > 0 then
+            slope2 = slope2 * -1
+        end
+
+        local a0 = vec3.add(p1, mat3.transform(m1, {0, -0.5 * s1, -0.5 * s1 * slope1 / 100}))
+        local a1 = vec3.add(p1, mat3.transform(m1, {0, 0.5 * s1, 0.5 * s1 * slope1 / 100}))
+        local a2 = vec3.add(p2, mat3.transform(m2, {0, -0.5 * s2, -0.5 * s2 * slope2 / 100}))
+        local a3 = vec3.add(p2, mat3.transform(m2, {0, 0.5 * s2, 0.5 * s2 * slope2 / 100}))
+
+        local n = vec3.length(vec3.sub(a2, a1)) * 0.333
+
+        local c1 = vec3.add(p1, mat3.transform(m1, {0, 0.5 * s1 + n, (0.5 * s1 + n) * slope1 / 100}))
+        local c2 = vec3.add(p2, mat3.transform(m2, {0, -0.5 * s2 - n, (-0.5 * s2 - n) * slope2 / 100}))
+
+        local spline = spline.cubicBezierCurveByLength(a1, c1, c2, a2, funicular.segmentLength, 0.05)
+
+        if i == 1 then
+            result.edges[#result.edges + 1] = {
+                a0,
+                a1,
+                rack = stations[i].params.snowball_funicular_rack == 1,
+                type = stations[i].params.snowball_funicular_type
+            }
+        end
+        result.edges[#result.edges + 1] = {
+            a2,
+            a3,
+            rack = stations[i].params.snowball_funicular_rack == 1,
+            type = stations[i].params.snowball_funicular_type
+        }
+        result.segments[#result.segments + 1] = {
+            points = spline,
+            rack = stations[i].params.snowball_funicular_rack == 1,
+            type = stations[i].params.snowball_funicular_type,
+            p1 = p1,
+            p2 = p2,
+            m1 = m1,
+            m2 = m2
+        }
+    end
+
+    return result
+end
+
+function funicular.getPolygon(points)
+    if #points < 1 then
+        return nil
+    elseif #points == 1 then
+        return {points[1]}
+    end
+
     local result = {}
 
-    if #points < 2 then
-        return {points[1]}
-    elseif #points == 2 then
-        result[#result + 1] = points[1]
-        local parts = math.round(length / width * 1.5)
-        for i = 1, parts - 1 do
-            result[#result + 1] = vec2.add(points[1], vec2.mul(i / parts, vec2.sub(points[2], points[1])))
-        end
-    else
-        local n = #points - 1
-
-        for i = 0, n - 1 do
-            result[#result + 1] = points[i + 1]
-
-            if i == 0 then
-                funicular.getCurveSegment({points[1], points[1], points[2], points[3]}, tension, width, result)
-            elseif (i == n - 1) then
-                funicular.getCurveSegment({points[n - 1], points[n], points[n + 1], points[n + 1]}, tension, width, result)
-            else
-                funicular.getCurveSegment({points[i], points[i + 1], points[i + 2], points[i + 3]}, tension, width, result)
-            end
-        end
+    --right side
+    for i = 1, #points - 1 do
+        result[#result + 1] = points[i]
     end
 
-    result[#result + 1] = points[#points]
+    --left side
+    for i = #points, 2, -1 do
+        result[#result + 1] = points[i]
+    end
 
-    for i = 1, #result do
-        if (not result[i][3]) or (not result[i].snapped) then
-            result[i][3] = game.interface.getHeight({result[i][1], result[i][2]})
-        end
+    if #result == 0 then
+        return nil
     end
 
     return result
+end
+
+function funicular.plan(slope, type, rack, result)
+    local modelPoints =
+        spline.linearByLength({0.0, -10, -10 * slope / 100}, {0.0, 10, 10 * slope / 100}, funicular.segmentLength)
+
+    result.models[#result.models + 1] = {
+        id = "snowball_funicular/snowball_funicular_arrow.mdl",
+        transf = {5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 1}
+    }
+
+    funicular.buildTrack(modelPoints, {0.0, 1, 0.0}, {0.0, 1, 0.0}, type, rack, result)
+    local stations = funicular.getStations()
+    local values = funicular.getValuesFromStations(stations)
+    if not values then
+        return
+    end
+
+    local points = {}
+
+    for i = 1, #values.segments do
+        for j = 1, #values.segments[i].points do
+            points[#points + 1] = values.segments[i].points[j]
+        end
+    end
+
+    local color = {0.9, 0.7, 0.3, 1}
+    local polygon = funicular.getPolygon(points)
+    local zone = {polygon = polygon, draw = true, drawColor = color}
+
+    game.interface.setZone("snowball_funicular_zone", zone)
+end
+
+function funicular.build(result)
+    result.models[#result.models + 1] = {
+        id = "asset/snowball_funicular_suspensor.mdl",
+        transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+    }
+
+    local stations = funicular.getStations()
+    local values = funicular.getValuesFromStations(stations)
+    if not values then
+        return
+    end
+
+    for i = 1, #stations do
+        game.interface.bulldoze(stations[i].id)
+    end
+
+    game.interface.setZone("snowball_funicular_zone", nil)
+
+    local player = game.interface.getPlayer()
+    local id =
+        game.interface.buildConstruction(
+        "station/rail/snowball_funicular_track.con",
+        {
+            forReal = false,
+            values = values
+        },
+        {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+    )
+
+    game.interface.setPlayer(id, player)
+
+    game.interface.upgradeConstruction(
+        id,
+        "station/rail/snowball_funicular_track.con",
+        {
+            forReal = true,
+            values = values
+        }
+    )
+end
+
+function funicular.reset(result)
+    result.models[#result.models + 1] = {
+        id = "asset/snowball_funicular_suspensor.mdl",
+        transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+    }
+
+    local stations = funicular.getStations()
+    local values = funicular.getValuesFromStations(stations)
+    if not values then
+        return
+    end
+
+    for i = 1, #stations do
+        game.interface.bulldoze(stations[i].id)
+    end
+
+    game.interface.setZone("snowball_funicular_zone", nil)
 end
 
 return funicular

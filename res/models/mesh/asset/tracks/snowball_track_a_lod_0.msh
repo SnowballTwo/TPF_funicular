@@ -1,26 +1,26 @@
 function data()
 return {
 	matConfigs = {
-		{ 0, 0, 0, }, { 1, 1, 1, }, 
+		{ 0, 0, 0, }, { 1, 1, 1, }
 	},
 	subMeshes = {
 		{
 			indices = {
 				normal = {
 					count = 108,
-					offset = 2544,
+					offset = 2448,
 				},
 				position = {
 					count = 108,
-					offset = 2436,
+					offset = 2340,
 				},
 				tangent = {
 					count = 108,
-					offset = 2220,
+					offset = 2556,
 				},
 				uv0 = {
 					count = 108,
-					offset = 2328,
+					offset = 2232,
 				},
 			},
 			materials = {
@@ -30,19 +30,19 @@ return {
 			indices = {
 				normal = {
 					count = 240,
-					offset = 3372,
+					offset = 3144,
 				},
 				position = {
 					count = 240,
-					offset = 3132,
+					offset = 2904,
 				},
 				tangent = {
 					count = 240,
-					offset = 2652,
+					offset = 3384,
 				},
 				uv0 = {
 					count = 240,
-					offset = 2892,
+					offset = 2664,
 				},
 			},
 			materials = {
@@ -52,19 +52,19 @@ return {
 			indices = {
 				normal = {
 					count = 288,
-					offset = 4476,
+					offset = 4200,
 				},
 				position = {
 					count = 288,
-					offset = 4188,
+					offset = 3912,
 				},
 				tangent = {
 					count = 288,
-					offset = 3612,
+					offset = 4488,
 				},
 				uv0 = {
 					count = 288,
-					offset = 3900,
+					offset = 3624,
 				},
 			},
 			materials = {
@@ -74,24 +74,24 @@ return {
 	},
 	vertexAttr = {
 		normal = {
-			count = 336,
+			count = 348,
 			numComp = 3,
-			offset = 1884,
+			offset = 1292,
 		},
 		position = {
 			count = 708,
 			numComp = 3,
-			offset = 1176,
+			offset = 584,
 		},
 		tangent = {
 			count = 592,
 			numComp = 4,
-			offset = 0,
+			offset = 1640,
 		},
 		uv0 = {
 			count = 584,
 			numComp = 2,
-			offset = 592,
+			offset = 0,
 		},
 	},
 }

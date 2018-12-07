@@ -10,8 +10,16 @@ function data()
 		snowball_funicular_length_10 = "Länge ( 10m )",
 		snowball_funicular_slope_10 = "Steigung ( 10% )",
 		snowball_funicular_slope_1 = "Steigung ( 1% )",
-		
-
+		snowball_funicular_mode = "Modus",
+		snowball_funicular_mode_plan = "Planen",
+		snowball_funicular_mode_reset = "Reset",
+		snowball_funicular_mode_build = "Bauen",
+		snowball_funicular_type = "Schwellen",
+		snowball_funicular_type_wood = "Holz",
+		snowball_funicular_type_stone = "Beton",
+		snowball_funicular_rack = "Zahnstange",
+		snowball_funicular_rack_yes = "Ja",
+		snowball_funicular_rack_no = "Nein",
 
 	},
 	en = {
@@ -23,6 +31,16 @@ function data()
 		snowball_funicular_length_10 = "length ( 10m )",
 		snowball_funicular_slope_10 = "slope ( 10% )",
 		snowball_funicular_slope_1 = "slope ( 1% )",
+		snowball_funicular_mode = "mode",
+		snowball_funicular_mode_plan = "plan",
+		snowball_funicular_mode_reset = "reset",
+		snowball_funicular_mode_build = "build",
+		snowball_funicular_type = "sleepers",
+		snowball_funicular_type_wood = "wood",
+		snowball_funicular_type_stone = "concrete",
+		snowball_funicular_rack = "rack",
+		snowball_funicular_rack_yes = "yes",
+		snowball_funicular_rack_no = "no",
 	},
 }
 end

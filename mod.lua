@@ -10,12 +10,7 @@ function data()
 		tags = { "Brush Asset, Industry, Strom, Energy, Kraftwerk" },		
 		visible = true,		
 			
-			authors = {			
-				{
-					name = 'RPGFabi',
-					role = 'CREATOR',
-					text = 'For myself',
-				},
+			authors = {	
 				{
 					name = 'Snowball',
 					role = 'CREATOR',

@@ -40,4 +40,8 @@ function vec3.angle(a,b)
 	return math.acos(unit)
 end
 
+function vec3.fromView(viewMatrix)
+	return {viewMatrix[13], viewMatrix[14],viewMatrix[15]}
+end
+
 return vec3

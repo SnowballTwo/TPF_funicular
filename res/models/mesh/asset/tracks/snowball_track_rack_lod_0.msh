@@ -1,0 +1,54 @@
+function data()
+return {
+	matConfigs = {
+		{ 0, }, 
+	},
+	subMeshes = {
+		{
+			indices = {
+				normal = {
+					count = 3336,
+					offset = 15044,
+				},
+				position = {
+					count = 3336,
+					offset = 11708,
+				},
+				tangent = {
+					count = 3336,
+					offset = 8372,
+				},
+				uv0 = {
+					count = 3336,
+					offset = 5036,
+				},
+			},
+			materials = {
+				"asset/tracks/holz/snowball_track_rail.mtl", 
+			},
+		}, 
+	},
+	vertexAttr = {
+		normal = {
+			count = 444,
+			numComp = 3,
+			offset = 4592,
+		},
+		position = {
+			count = 2640,
+			numComp = 3,
+			offset = 1952,
+		},
+		tangent = {
+			count = 704,
+			numComp = 4,
+			offset = 1248,
+		},
+		uv0 = {
+			count = 1248,
+			numComp = 2,
+			offset = 0,
+		},
+	},
+}
+end

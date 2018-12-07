@@ -70,6 +70,14 @@ function mat3.mul(a, b)
     }
 end
 
+function mat3.fromView(viewMatrix)
+    return {
+        {viewMatrix[1],viewMatrix[5],viewMatrix[9]},
+        {viewMatrix[2],viewMatrix[6],viewMatrix[10]},
+        {viewMatrix[3],viewMatrix[7],viewMatrix[11]}
+    }
+end
+
 function mat3.transform(a, vector)
     return {
         a[1][1] * vector[1] + a[1][2] * vector[2] + a[1][3] * vector[3],

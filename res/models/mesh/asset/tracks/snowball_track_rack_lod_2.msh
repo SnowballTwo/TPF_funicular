@@ -24,7 +24,7 @@ return {
 				},
 			},
 			materials = {
-				"asset/tracks/holz/snowball_track_3_rail.mtl", 
+				"asset/tracks/holz/snowball_track_rail.mtl", 
 			},
 		}, 
 	},

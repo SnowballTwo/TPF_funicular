@@ -2,7 +2,7 @@ function data()
 return {
 	boundingInfo = {
 		bbMax = { 4.0, 2.0, 0.53, },
-		bbMin = { 0.0, 0.0, -0.0094, },
+		bbMin = { 0.0, 0.0, 0.0, },
 	},
 	collider = {
 		params = {
@@ -14,7 +14,7 @@ return {
 		{
 			children = {
 				{
-					id = "asset/tracks/snowball_track_a_lod_0.msh",
+					id = "asset/tracks/snowball_track_b_lod_0.msh",
 					transf = {
 						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
 					},
@@ -22,7 +22,7 @@ return {
 				}, 
 			},
 			matConfigs = {
-				{ 0, }, 
+				{ 1, }, 
 			},
 			static = false,
 			visibleFrom = 0,
@@ -30,7 +30,7 @@ return {
 		}, {
 			children = {
 				{
-					id = "asset/tracks/snowball_track_a_lod_1.msh",
+					id = "asset/tracks/snowball_track_b_lod_1.msh",
 					transf = {
 						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
 					},
@@ -38,7 +38,7 @@ return {
 				}, 
 			},
 			matConfigs = {
-				{ 0, }, 
+				{ 1, }, 
 			},
 			static = false,
 			visibleFrom = 750,

@@ -1,0 +1,98 @@
+local colliderutil = require "colliderutil"
+local funicular = require "snowball_funicular"
+local vec2 = require "snowball_funicular_vec2"
+local vec3 = require "snowball_funicular_vec3"
+local mat3 = require "snowball_funicular_mat3"
+local spline = require "snowball_funicular_spline"
+
+local modes = {"plan", "build", "reset"}
+
+function data()
+    return {
+        type = "RAIL_STATION",
+        buildMode = "MULTI",
+        description = {
+            name = _("Funicular Planner"),
+            description = _("Truck station with two cargo terminals.")
+        },
+        categories = {"snowball_funicular"},
+        availability = {},
+        order = 197720809,
+        skipCollision = true,
+        autoRemovable = false,
+        params = {
+            {
+                key = "snowball_funicular_mode",
+                name = _("snowball_funicular_mode"),
+                values = {
+                    _("snowball_funicular_mode_plan"),
+                    _("snowball_funicular_mode_build"),
+                    _("snowball_funicular_mode_reset")
+                },
+                defaultIndex = 0
+            },            
+            {
+                key = "snowball_funicular_type",
+                name = _("snowball_funicular_type"),
+                values = {_("snowball_funicular_type_wood"), _("snowball_funicular_type_stone")},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_funicular_rack",
+                name = _("snowball_funicular_rack"),
+                values = { _("snowball_funicular_rack_no"),_("snowball_funicular_rack_yes")},
+                defaultIndex = 1
+            },
+            {
+                key = "snowball_funicular_slope_sign",
+                name = _("snowball_funicular_slope_sign"),
+                values = {_("+"), _("-")},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_funicular_slope_10",
+                name = _("snowball_funicular_slope_10"),
+                values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
+                defaultIndex = 0
+            },
+            {
+                key = "snowball_funicular_slope_1",
+                name = _("snowball_funicular_slope_1"),
+                values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
+                defaultIndex = 0
+            },
+
+        },
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {},
+                        slopeLow = 1,
+                        slopeHigh = 1
+                    }
+                }
+            }
+
+            local mode = modes[params.snowball_funicular_mode + 1]
+            local type = params.snowball_funicular_type
+            local rack = params.snowball_funicular_rack == 1
+            local slope = params.snowball_funicular_slope_10 * 10 + params.snowball_funicular_slope_1
+            if params.snowball_funicular_slope_sign > 0 then
+                slope = slope * -1
+            end
+            
+            if mode == "plan" then
+                funicular.plan(slope, type, rack, result)
+            elseif mode == "build" then
+                funicular.build(result)
+            elseif mode == "reset" then
+                funicular.reset(result)
+            end
+
+            return result
+        end
+    }
+end

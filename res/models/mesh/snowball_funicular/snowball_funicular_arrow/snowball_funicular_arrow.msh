@@ -7,47 +7,47 @@ return {
 		{
 			indices = {
 				normal = {
-					count = 2592,
-					offset = 12352,
+					count = 1296,
+					offset = 4320,
 				},
 				position = {
-					count = 2592,
-					offset = 9760,
+					count = 1296,
+					offset = 5616,
 				},
 				tangent = {
-					count = 2592,
-					offset = 7168,
+					count = 1296,
+					offset = 6912,
 				},
 				uv0 = {
-					count = 2592,
-					offset = 4576,
+					count = 1296,
+					offset = 8208,
 				},
 			},
 			materials = {
-				"asset/tracks/holz/snowball_track_3_rail.mtl", 
+				"snowball_funicular/snowball_funicular_yellow.mtl", 
 			},
 		}, 
 	},
 	vertexAttr = {
 		normal = {
-			count = 336,
+			count = 672,
 			numComp = 3,
-			offset = 4240,
+			offset = 0,
 		},
 		position = {
-			count = 2640,
+			count = 672,
 			numComp = 3,
-			offset = 1600,
+			offset = 672,
 		},
 		tangent = {
-			count = 624,
+			count = 1968,
 			numComp = 4,
-			offset = 976,
+			offset = 1344,
 		},
 		uv0 = {
-			count = 976,
+			count = 1008,
 			numComp = 2,
-			offset = 0,
+			offset = 3312,
 		},
 	},
 }
