@@ -7,7 +7,7 @@ return {
 		},
 		map_color_reflect = {
 			compressionAllowed = true,
-			fileName = "tracks/ballast.tga",
+			fileName = "tracks/snowball_funicular_ballast.tga",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0.0,
@@ -27,7 +27,7 @@ return {
 		},
 		map_normal = {
 			compressionAllowed = true,
-			fileName = "tracks/ballast_nrml.tga",
+			fileName = "tracks/snowball_funicular_ballast_nrml.tga",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0.0,
@@ -37,7 +37,7 @@ return {
 		},
 		map_op = {
 			compressionAllowed = true,
-			fileName = "tracks/ballast_color.tga",
+			fileName = "tracks/snowball_funicular_ballast_color.tga",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0.0,

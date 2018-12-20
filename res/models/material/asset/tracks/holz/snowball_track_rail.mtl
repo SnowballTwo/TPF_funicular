@@ -3,7 +3,7 @@ return {
 	params = {
 		map_color_reflect = {
 			compressionAllowed = true,
-			fileName = "tracks/rail.tga",
+			fileName = "tracks/snowball_funicular_rail.tga",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0,

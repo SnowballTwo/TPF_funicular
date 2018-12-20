@@ -84,8 +84,10 @@ function data()
 						spline.linearByLength(values.edges[i][1], values.edges[i][2], funicular.segmentLength),
 						direction,
 						direction,
+						false,
 						values.edges[i].type,
 						values.edges[i].rack,
+						false,
 						result
 					)
 				end
@@ -106,23 +108,28 @@ function data()
 							type = funicular.trackTypeToConfig(values.edges[i].type) .. ".lua"
 						},
 						edges = {
-							{values.edges[i][2], vec3.mul(vec3.length(vec3.sub(b,a)), direction1)},
-							{values.edges[i + 1][1], vec3.mul(vec3.length(vec3.sub(b,a)), direction2)}
+							{values.edges[i][2], vec3.mul(vec3.length(vec3.sub(b, a)), direction1)},
+							{values.edges[i + 1][1], vec3.mul(vec3.length(vec3.sub(b, a)), direction2)}
 						},
-						snapNodes = {}
+						snapNodes = {},
+						freeNodes = {0, 1}
 					}
-				end]]
+				end]]--
 			end
+			
 
-			for i = 1, #values.segments do
-				local segment = values.segments[i]
-				local edge1 = values.edges[i]
-				local direction1 = vec3.normalize(vec3.sub(edge1[2], edge1[1]))
-				local edge2 = values.edges[i + 1]
-				local direction2 = vec3.normalize(vec3.sub(edge2[2], edge2[1]))
+			for i = 1, #values.segments do		 
+				
+                local segment = values.segments[i]
+                local edge1 = values.edges[i]
+                local direction1 = vec3.normalize(vec3.sub(edge1[2], edge1[1]))
+                local edge2 = values.edges[i + 1]
+                local direction2 = vec3.normalize(vec3.sub(edge2[2], edge2[1]))
 
-				funicular.buildTrack(segment.points, direction1, direction2, segment.type, segment.rack, result)
+				funicular.buildTrack(segment.points, direction1, direction2, false, segment.type, segment.rack, false, result)
+				
 			end
+			
 			return result
 		end
 	}

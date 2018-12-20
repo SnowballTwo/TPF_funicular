@@ -12,8 +12,11 @@ function data()
             name = _("Truck station"),
             description = _("Truck station with two cargo terminals.")
         },
-        categories = { "snowball_funicular" },
-        availability = {},
+        categories = {"snowball_funicular"},
+        availability = {
+            yearFrom = 244,
+            yearTo = 245
+        },
         order = 1977208010,
         params = {
             {
@@ -63,42 +66,41 @@ function data()
                 name = _("snowball_funicular_slope_1"),
                 values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
                 defaultIndex = 0
-            },           
-            
+            }
         },
         updateFn = function(params)
             local result = {
                 models = {}
             }
-            
+
             local width = 10
             local prewidth = 20
-            local length = math.max(50, 100 * (params.snowball_funicular_length_100) + 10 * (params.snowball_funicular_length_10))
+            local length =
+                math.max(50, 100 * (params.snowball_funicular_length_100) + 10 * (params.snowball_funicular_length_10))
             local slope = 0.1 * (params.snowball_funicular_slope_10) + 0.01 * (params.snowball_funicular_slope_1)
-            local radius = math.max(10, 100 * (params.snowball_funicular_radius_100) + 10 * (params.snowball_funicular_radius_10))
+            local radius =
+                math.max(10, 100 * (params.snowball_funicular_radius_100) + 10 * (params.snowball_funicular_radius_10))
             local direction = directions[params.snowball_funicular_direction + 1]
             local rack = params.snowball_funicular_rack == 0
 
             local up = length * slope
             local height = params.state.track.railBase + params.state.track.railHeight
-            
 
             local k = 0.5528
-            local angle = length / radius            
-            
+            local angle = length / radius
 
-            local d = {(math.cos(angle) * radius - radius) * direction, math.sin(angle) * radius, up}            
+            local d = {(math.cos(angle) * radius - radius) * direction, math.sin(angle) * radius, up}
             local dne = vec3.normalize({-math.sin(angle) * direction, math.cos(angle), 0})
 
             if (direction == 0) then
-                d = {0, length, up}  
-                dne = {0, 1, 0}  
+                d = {0, length, up}
+                dne = {0, 1, 0}
             end
 
             local dn = {dne[2], -dne[1], 0}
             local e = vec3.add(d, vec3.mul(prewidth, dne))
 
-            local pre_snap = {0.0, -prewidth, 0 }
+            local pre_snap = {0.0, -prewidth, 0}
             local pre_start = {0.0, 0.0, 0}
             local pre_vec = {0.0, prewidth, 0.0}
 
@@ -132,19 +134,13 @@ function data()
                     snapNodes = {1}
                 }
             }
-            local parts = math.round( length / funicular.segmentLength)
+            local parts = math.round(length / funicular.segmentLength)
             local zcurve =
-                funicular.deCasteljau(
-                {0, 0},
-                {length * 0.2, 0},
-                {length - length * 0.2, up},
-                {length, up},
-                parts
-            )
+                funicular.deCasteljau({0, 0}, {length * 0.2, 0}, {length - length * 0.2, up}, {length, up}, parts)
             local ecurve = nil
 
             if direction == 0 then
-                ecurve = funicular.lineSegment({0.0,0.0,0.0}, {0.0, length, 0.0}, parts)
+                ecurve = funicular.lineSegment({0.0, 0.0, 0.0}, {0.0, length, 0.0}, parts)
             else
                 ecurve = funicular.arcSegment(radius, {-radius * direction, 0}, angle, direction, parts)
             end
@@ -152,11 +148,15 @@ function data()
             for i = 1, #ecurve do
                 ecurve[i][3] = zcurve[i][2]
             end
-            funicular.buildTrack( ecurve,            
-            vec3.normalize(vec3.sub(pre_start, pre_snap)),
-            vec3.normalize(vec3.sub(post_snap, post_start)), 
-            0, rack, result)
-
+            funicular.buildTrack(
+                ecurve,
+                vec3.normalize(vec3.sub(pre_start, pre_snap)),
+                vec3.normalize(vec3.sub(post_snap, post_start)),
+                0,
+                rack,
+                false,
+                result
+            )
 
             return result
         end

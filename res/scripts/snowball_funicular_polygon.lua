@@ -1,3 +1,5 @@
+local vec2 = require "snowball_funicular_vec2"
+
 local polygon = {}
 
 function polygon.intersects(line1, line2)

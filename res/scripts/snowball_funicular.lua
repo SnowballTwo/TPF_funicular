@@ -19,21 +19,6 @@ funicular.trackTypeConcrete = 1
 
 funicular.radius = 100
 
-function funicular.dump(o)
-    if type(o) == "table" then
-        local s = "{ "
-        for k, v in pairs(o) do
-            if type(k) ~= "number" then
-                k = '"' .. k .. '"'
-            end
-            s = s .. "[" .. k .. "] = " .. funicular.dump(v) .. ","
-        end
-        return s .. "} "
-    else
-        return tostring(o)
-    end
-end
-
 function funicular.buildSegment(p1, p2, model, modelSize, result)
     local b1 = vec2.ortho(vec2.sub(p2, p1))
     local b2 = vec3.sub(p2, p1)
@@ -196,7 +181,7 @@ function funicular.trackTypeToConfig(type)
     return "standard"
 end
 
-function funicular.buildTrack(points, startDirection, endDirection, type, rack, result)
+function funicular.buildTrack(points, startDirection, endDirection, asEdge, type, rack, snap, result)
     local terrainFaces = {}
     local colliderFaces = {}
     local groundFaces = {}
@@ -208,15 +193,22 @@ function funicular.buildTrack(points, startDirection, endDirection, type, rack, 
         local p2 = points[i + 1]
 
         local n1 = nil
+        local d1 = nil
+        local length = vec3.length(vec3.sub(p2, p1))
+
         if i == 1 then
-            n1 = vec2.normalize(vec2.ortho(startDirection))
+            d1 = vec3.normalize(startDirection)
+            n1 = vec2.normalize(vec2.ortho(d1))
         else
+            d1 = vec3.normalize(vec3.sub(points[i + 1], points[i - 1]))
             n1 = funicular.getNormal(p1, points[i - 1], points[i + 1])
         end
         local n2 = nil
         if i == #points - 1 then
+            d2 = vec3.normalize(endDirection)
             n2 = vec2.normalize(vec2.ortho(endDirection))
         else
+            d2 = vec3.normalize(vec3.sub(points[i + 2], points[i]))
             n2 = funicular.getNormal(p2, p1, points[i + 2])
         end
 
@@ -231,13 +223,15 @@ function funicular.buildTrack(points, startDirection, endDirection, type, rack, 
             right[#right + 1] = vec3.add(p2, vec3.mul(0.5 * funicular.segmentWidth, n2))
         end
 
-        funicular.buildSegment(
-            {p1[1], p1[2], p1[3] + funicular.segmentHeight},
-            {p2[1], p2[2], p2[3] + funicular.segmentHeight},
-            "asset/snowball_funicular_lane.mdl",
-            {1, 1, 1},
-            result
-        )
+        if not asEdge then
+            funicular.buildSegment(
+                {p1[1], p1[2], p1[3] + funicular.segmentHeight},
+                {p2[1], p2[2], p2[3] + funicular.segmentHeight},
+                "asset/snowball_funicular_lane.mdl",
+                {1, 1, 1},
+                result
+            )
+        end
 
         if rack then
             funicular.buildSegment(
@@ -251,17 +245,42 @@ function funicular.buildTrack(points, startDirection, endDirection, type, rack, 
 
         local trackConfig = funicular.trackTypeToConfig(type)
 
-        funicular.buildWideSegment(
-            {p1[1], p1[2], p1[3]},
-            {p2[1], p2[2], p2[3]},
-            n1,
-            n2,
-            "asset/tracks/snowball_track_" .. trackConfig .. "_a.mdl",
-            "asset/tracks/snowball_track_" .. trackConfig .. "_b.mdl",
-            {funicular.segmentWidth, funicular.segmentLength, 1},
-            result
-        )
+        if asEdge then
+            if not result.edgeLists then
+                result.edgeLists = {}
+            end
 
+            local snapNodes = {}
+            if snap and i == 1 then
+                snapNodes = {0}
+            elseif snap and i ==  #points - 1 then
+                snapNodes = {1}
+            end
+
+            result.edgeLists[#result.edgeLists + 1] = {
+                type = "TRACK",
+                params = {
+                    catenary = false,
+                    type = trackConfig .. ".lua"
+                },
+                edges = {
+                    {p1, vec3.mul(length, d1)},
+                    {p2, vec3.mul(length, d2)}
+                },
+                snapNodes = snapNodes
+            }
+        else
+            funicular.buildWideSegment(
+                {p1[1], p1[2], p1[3]},
+                {p2[1], p2[2], p2[3]},
+                n1,
+                n2,
+                "asset/tracks/snowball_track_" .. trackConfig .. "_a.mdl",
+                "asset/tracks/snowball_track_" .. trackConfig .. "_b.mdl",
+                {funicular.segmentWidth, funicular.segmentLength, 1},
+                result
+            )
+        end
         terrainFaces[#terrainFaces + 1] = {
             vec3.add(p1, vec3.mul(-funicular.segmentWidth, n1)),
             vec3.add(p2, vec3.mul(-funicular.segmentWidth, n2)),
@@ -288,34 +307,35 @@ function funicular.buildTrack(points, startDirection, endDirection, type, rack, 
     if not result.terrainAlignmentLists then
         result.terrainAlignmentLists = {}
     end
+    if not asEdge then
+        result.terrainAlignmentLists[#result.terrainAlignmentLists + 1] = {
+            type = "EQUAL",
+            faces = terrainFaces,
+            slopeLow = 1,
+            slopeHigh = 1
+        }
 
-    result.terrainAlignmentLists[#result.terrainAlignmentLists + 1] = {
-        type = "EQUAL",
-        faces = terrainFaces,
-        slopeLow = 1,
-        slopeHigh = 1
-    }
+        if not result.colliders then
+            result.colliders = {}
+        end
 
-    if not result.colliders then
-        result.colliders = {}
+        for i = 1, #colliderFaces do
+            result.colliders[#result.colliders + 1] = colliderutil.createPointCloud(colliderFaces[i])
+        end
+
+        if not result.groundFaces then
+            result.groundFaces = {}
+        end
+
+        result.groundFaces[#result.groundFaces + 1] = {
+            face = groundFaces,
+            modes = {{type = "STROKE_OUTER", key = "ballast"}}
+        }
+        result.groundFaces[#result.groundFaces + 1] = {
+            face = constructionutil.reverseFace(groundFaces),
+            modes = {{type = "STROKE_OUTER", key = "ballast"}}
+        }
     end
-
-    for i = 1, #colliderFaces do
-        result.colliders[#result.colliders + 1] = colliderutil.createPointCloud(colliderFaces[i])
-    end
-
-    if not result.groundFaces then
-        result.groundFaces = {}
-    end
-
-    result.groundFaces[#result.groundFaces + 1] = {
-        face = groundFaces,
-        modes = {{type = "STROKE_OUTER", key = "ballast"}}
-    }
-    result.groundFaces[#result.groundFaces + 1] = {
-        face = constructionutil.reverseFace(groundFaces),
-        modes = {{type = "STROKE_OUTER", key = "ballast"}}
-    }
 end
 
 local function compareBySeed(a, b)
@@ -324,12 +344,13 @@ end
 
 function funicular.getStations()
     local constructions =
-        game.interface.getEntities({pos = {0, 0}, radius = 900000}, {type = "CONSTRUCTION", includeData = true})
+        game.interface.getEntities(
+        {pos = {0, 0}, radius = 900000},
+        {type = "CONSTRUCTION", includeData = true, fileName = "station/rail/snowball_funicular_planner.con"}
+    )
     local stations = {}
-    for id, data in pairs(constructions) do
-        if data.fileName == "station/rail/snowball_funicular_planner.con" then
-            stations[#stations + 1] = data
-        end
+    for id, data in pairs(constructions) do        
+        stations[#stations + 1] = data        
     end
     table.sort(stations, compareBySeed)
 
@@ -433,16 +454,56 @@ function funicular.getPolygon(points)
     return result
 end
 
+function funicular.checkAngles(points)
+    
+    for i = 1, #points - 2 do
+
+        local a = vec2.sub(points[i+1], points[i])
+        local b = vec2.sub(points[i+2], points[i+1])
+        local la = vec2.length(a)
+        local lb = vec2.length(b)
+        local angle = math.acos(vec2.dot(a,b) / ( la * lb))
+        local d = math.sin(angle) * funicular.segmentWidth
+        
+        if d > la or d > lb then
+            return false
+        end        
+    end
+
+    return true
+end
+
 function funicular.plan(slope, type, rack, result)
     local modelPoints =
         spline.linearByLength({0.0, -10, -10 * slope / 100}, {0.0, 10, 10 * slope / 100}, funicular.segmentLength)
 
-    result.models[#result.models + 1] = {
-        id = "snowball_funicular/snowball_funicular_arrow.mdl",
-        transf = {5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 1}
-    }
+    
+    local arrowtrans = transf.rotZYXTransl({x = 0, y = 0, z = math.asin( slope / 100 )}, {x = 0, y = 0, z=5 })
 
-    funicular.buildTrack(modelPoints, {0.0, 1, 0.0}, {0.0, 1, 0.0}, type, rack, result)
+    --[[
+        8: max slope to build
+        11: max slope to snap
+        30: arbitary high slope
+    ]]
+
+    if math.abs( slope ) <= 11 then
+        result.models[#result.models + 1] = {
+            id = "snowball_funicular/snowball_funicular_arrow_green.mdl",
+            transf = arrowtrans
+        }
+    elseif math.abs( slope ) <= 30 then
+        result.models[#result.models + 1] = {
+            id = "snowball_funicular/snowball_funicular_arrow_yellow.mdl",
+            transf = arrowtrans
+        }
+    else
+        result.models[#result.models + 1] = {
+            id = "snowball_funicular/snowball_funicular_arrow_red.mdl",
+            transf = arrowtrans
+        }
+    end
+
+    funicular.buildTrack(modelPoints, {0.0, 1, 0.0}, {0.0, 1, 0.0}, math.abs( slope ) <= 8, type, rack, true, result)
     local stations = funicular.getStations()
     local values = funicular.getValuesFromStations(stations)
     if not values then
@@ -457,7 +518,12 @@ function funicular.plan(slope, type, rack, result)
         end
     end
 
+    local anglesOk = funicular.checkAngles(points)
+    
     local color = {0.9, 0.7, 0.3, 1}
+    if not anglesOk then
+        color = {1.0, 0.2, 0.1, 1}
+    end
     local polygon = funicular.getPolygon(points)
     local zone = {polygon = polygon, draw = true, drawColor = color}
 
@@ -476,11 +542,26 @@ function funicular.build(result)
         return
     end
 
+    
+
     for i = 1, #stations do
         game.interface.bulldoze(stations[i].id)
     end
 
     game.interface.setZone("snowball_funicular_zone", nil)
+
+    local points = {}
+
+    for i = 1, #values.segments do
+        for j = 1, #values.segments[i].points do
+            points[#points + 1] = values.segments[i].points[j]
+        end
+    end
+
+    local anglesOk = funicular.checkAngles(points)
+    if not anglesOk then
+        return
+    end
 
     local player = game.interface.getPlayer()
     local id =

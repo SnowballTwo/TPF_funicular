@@ -1,0 +1,58 @@
+function data()
+return {
+	matConfigs = {
+		{ 0 },
+		{ 1 }, 
+		{ 2 },  
+	},
+	subMeshes = {
+		{
+			indices = {
+				normal = {
+					count = 264,
+					offset = 1016,
+				},
+				position = {
+					count = 264,
+					offset = 752,
+				},
+				tangent = {
+					count = 264,
+					offset = 1544,
+				},
+				uv0 = {
+					count = 264,
+					offset = 1280,
+				},
+			},
+			materials = {
+				"snowball_funicular/snowball_funicular_arrow_green.mtl", 
+				"snowball_funicular/snowball_funicular_arrow_yellow.mtl", 
+				"snowball_funicular/snowball_funicular_arrow_red.mtl", 
+			},
+		}, 
+	},
+	vertexAttr = {
+		normal = {
+			count = 24,
+			numComp = 3,
+			offset = 456,
+		},
+		position = {
+			count = 456,
+			numComp = 3,
+			offset = 0,
+		},
+		tangent = {
+			count = 112,
+			numComp = 4,
+			offset = 640,
+		},
+		uv0 = {
+			count = 160,
+			numComp = 2,
+			offset = 480,
+		},
+	},
+}
+end

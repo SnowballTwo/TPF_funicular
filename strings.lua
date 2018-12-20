@@ -1,15 +1,27 @@
 function data()
 	return {
 	de = {		
-		title = "Standseilbahn",
-		description = "Bau das, wogegen Gemeinden demonstrieren in deine Modelleisenbahn! Hurra!",
+		snowball_funicular_title = "Steilstrecke",
+		snowball_funicular_description = "Kann benutzt werden, um eine Steilstrecke zu planen und zu bauen\n\z
+		-----------------------------------------\n\z
+		Schritt 1: Im Modus 'Planen' können Stützstellen festgelegt werden.\n\z
+		Schritt 2: Beim Klick auf 'Bauen' werden die Stützstellen verbunden.\n\z
+		-----------------------------------------\n\z
+		Die Stützstellen sind farblich codiert:\n\z
+		Grün: 0 - 11 % Steigung - Gleise können angebaut werden\n\z
+		Gelb: 11 - 30 % Steigung - Es können keine Gleise angebaut werden\n\z
+		Rot: 31-90 % Steigung - Schwache Loks bekommen Probleme",
+		snowball_funicular_rack_description = "Fügt dem Gleis eine Zahnstange hinzu.",
 		snowball_funicular_direction = "Richtung",
 		snowball_funicular_radius_100 = "Radius ( 100m )",
 		snowball_funicular_radius_10 = "Radius ( 10m )",
 		snowball_funicular_length_100 = "Länge ( 100m )",
 		snowball_funicular_length_10 = "Länge ( 10m )",
+		snowball_funicular_length = "Länge ( m )",
 		snowball_funicular_slope_10 = "Steigung ( 10% )",
 		snowball_funicular_slope_1 = "Steigung ( 1% )",
+		snowball_funicular_slope_percent = "Steigung ( % )",
+		snowball_funicular_slope_sign = "Vorzeichen",
 		snowball_funicular_mode = "Modus",
 		snowball_funicular_mode_plan = "Planen",
 		snowball_funicular_mode_reset = "Reset",
@@ -23,14 +35,27 @@ function data()
 
 	},
 	en = {
-		title = "Funicular",
-        description = "",		
+		snowball_funicular_title = "Steep tracks",
+        snowball_funicular_description = "Can be used to plan and build very steep tracks\n\z
+		-----------------------------------------\n\z
+		Step 1: Set sampling points in 'plan' mode.\n\z
+		Step 2: Connect the points.\n\z
+		-----------------------------------------\n\z
+		The points are coded with a color:\n\z
+		Green: 0 - 11 % slope - snapping is possible\n\z
+		Yellow: 11 - 30 % slope - snapping is not possible\n\z
+		Red: 31-90 % slope - weak engines might have problems",	
+		snowball_funicular_rack_description = "Adds a rack to the track.",
+		snowball_funicular_direction = "direction",
 		snowball_funicular_radius_100 = "radius ( 100m )",
 		snowball_funicular_radius_10 = "radius ( 10m )",
 		snowball_funicular_length_100 = "length ( 100m )",
 		snowball_funicular_length_10 = "length ( 10m )",
+		snowball_funicular_length = "length ( m )",
 		snowball_funicular_slope_10 = "slope ( 10% )",
 		snowball_funicular_slope_1 = "slope ( 1% )",
+		snowball_funicular_slope_percent = "slope ( % )",
+		snowball_funicular_slope_sign = "sign",
 		snowball_funicular_mode = "mode",
 		snowball_funicular_mode_plan = "plan",
 		snowball_funicular_mode_reset = "reset",

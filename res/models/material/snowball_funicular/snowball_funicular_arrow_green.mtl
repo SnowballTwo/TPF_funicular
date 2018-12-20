@@ -7,13 +7,13 @@ return {
 		},
 		map_color_reflect = {
 			compressionAllowed = true,
-			fileName = "tracks/snowball_funicular_sleeper_stone.tga",
+			fileName = "models/snowball_funicular/snowball_funicular_arrow_green.tga",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 			mipmapAlphaScale = 0.0,
 			type = "TWOD",
-			wrapS = "REPEAT",
-			wrapT = "REPEAT",
+			wrapS = "CLAMP_TO_EDGE",
+			wrapT = "CLAMP_TO_EDGE",
 		},
 		map_env = {
 			compressionAllowed = true,

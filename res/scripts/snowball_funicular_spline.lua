@@ -31,9 +31,7 @@ function spline3.approximateParamter(b0, b1, b2, b3, length, tolerance)
         l = vec3.length(vec3.sub(b,b0))
         ratio = l / length
     end
-
-    print("Approximated 'dt' to "..dt.." with a remaining deviation of "..math.abs(ratio - 1) * 100 .. "%.")
-
+    
     return dt
 
 end
@@ -66,9 +64,7 @@ function spline3.cubicBezierCurveByLength(b0, b1, b2, b3, length, tolerance)
 
     for i = 1, count - 1 do
         t = i * dt
-        result[#result + 1] = spline3.cubicBezierPoint(b0, b1, b2, b3, t)
-        local segmentLength = vec3.length(vec3.sub(result[#result], result[#result - 1]))
-        print("Added segment with length "..segmentLength.." to point ["..result[#result][1]..","..result[#result][2]..","..result[#result][3].."] which means a deviation of "..math.abs(segmentLength / length - 1) * 100 .. "%")
+        result[#result + 1] = spline3.cubicBezierPoint(b0, b1, b2, b3, t)             
     end
     
     result[#result + 1] = b3

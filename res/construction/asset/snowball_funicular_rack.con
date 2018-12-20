@@ -1,0 +1,62 @@
+local colliderutil = require "colliderutil"
+local constructionutil = require "constructionutil"
+local funicular = require "snowball_funicular"
+local vec2 = require "snowball_funicular_vec2"
+local vec3 = require "snowball_funicular_vec3"
+local directions = {1, 0, -1}
+
+function data()
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("snowball_funicular_rack"),
+            description = _("snowball_funicular_rack_description")
+        },
+        categories = {"snowball_funicular"},
+        buildMode="MULTI",
+        availability = {},
+        order = 1977208010,
+        skipCollision = true,
+		autoRemovable = false,
+        params = {           
+            {
+                key = "snowball_funicular_length",
+                name = _("snowball_funicular_length"),
+                values = {"2", "4", "6", "8", "10", "12"},
+                defaultIndex = 0
+            },          
+            
+            {
+                key = "snowball_funicular_slope_percent",
+                name = _("snowball_funicular_slope_percent"),
+                values = {"0", "1", "2", "3", "4", "5", "6", "7", "8"},
+                defaultIndex = 0
+            }
+        },
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {},
+                        slopeLow = 1,
+                        slopeHigh = 1
+                    }
+                }
+            }
+
+            local slope = 0.01 * params.snowball_funicular_slope_percent
+            local count = params.snowball_funicular_length + 1
+            local modelSize
+            for i=0, count - 1 do
+
+                local p1 = { i * funicular.segmentLength, 0, i * funicular.segmentLength * slope + 0.54}
+                local p2 = { (i + 1) * funicular.segmentLength,0, (i + 1) * funicular.segmentLength * slope + 0.54}
+
+                funicular.buildSegment(p1, p2, "asset/tracks/snowball_track_rack.mdl", {1, funicular.segmentLength , 1}, result)
+            end
+            return result
+        end
+    }
+end

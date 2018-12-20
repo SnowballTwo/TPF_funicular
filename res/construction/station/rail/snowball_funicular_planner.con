@@ -12,8 +12,8 @@ function data()
         type = "RAIL_STATION",
         buildMode = "MULTI",
         description = {
-            name = _("Funicular Planner"),
-            description = _("Truck station with two cargo terminals.")
+            name = _("snowball_funicular_title"),
+            description = _("snowball_funicular_description")
         },
         categories = {"snowball_funicular"},
         availability = {},
@@ -30,7 +30,7 @@ function data()
                     _("snowball_funicular_mode_reset")
                 },
                 defaultIndex = 0
-            },            
+            },
             {
                 key = "snowball_funicular_type",
                 name = _("snowball_funicular_type"),
@@ -40,7 +40,7 @@ function data()
             {
                 key = "snowball_funicular_rack",
                 name = _("snowball_funicular_rack"),
-                values = { _("snowball_funicular_rack_no"),_("snowball_funicular_rack_yes")},
+                values = {_("snowball_funicular_rack_no"), _("snowball_funicular_rack_yes")},
                 defaultIndex = 1
             },
             {
@@ -60,8 +60,7 @@ function data()
                 name = _("snowball_funicular_slope_1"),
                 values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
                 defaultIndex = 0
-            },
-
+            }
         },
         updateFn = function(params)
             local result = {
@@ -83,7 +82,7 @@ function data()
             if params.snowball_funicular_slope_sign > 0 then
                 slope = slope * -1
             end
-            
+
             if mode == "plan" then
                 funicular.plan(slope, type, rack, result)
             elseif mode == "build" then

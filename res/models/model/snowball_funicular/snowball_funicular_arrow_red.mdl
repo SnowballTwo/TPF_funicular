@@ -1,21 +1,26 @@
 function data()
 return {
 	boundingInfo = {
-		bbMax = { 0.5, 1.0, 1.25, },
-		bbMin = { -0.5, -1.0, 0.0, },
+		bbMax = { 3.93673, 7.92256, 1.0, },
+		bbMin = { -3.93835, -7.5, 0.0, },
 	},
 	collider = {
 		params = {
-			center = { 0, 0, 0.625 },
-			halfExtents = { 0.5, 1, 0.625 }
+			
 		},
-		type = "BOX"
+		type = "MESH",
 	},
 	lods = {
 		{
 			children = {
 				{
-					id = "snowball_funicular/snowball_funicular_arrow/snowball_funicular_arrow.msh",
+					id = "snowball_funicular/snowball_funicular_arrow_color.msh",
+					transf = {
+						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
+					},
+					type = "MESH",
+				}, {
+					id = "snowball_funicular/snowball_funicular_arrow_white.msh",
 					transf = {
 						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
 					},
@@ -23,7 +28,7 @@ return {
 				}, 
 			},
 			matConfigs = {
-				{ 0, }, 
+				{ 2, 0, }, 
 			},
 			static = false,
 			visibleFrom = 0,
