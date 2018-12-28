@@ -4,6 +4,7 @@ return {
 		{ 0 },
 		{ 1 }, 
 		{ 2 },  
+		{ 3 }, 
 	},
 	subMeshes = {
 		{
@@ -29,6 +30,7 @@ return {
 				"snowball_funicular/snowball_funicular_arrow_green.mtl", 
 				"snowball_funicular/snowball_funicular_arrow_yellow.mtl", 
 				"snowball_funicular/snowball_funicular_arrow_red.mtl", 
+				"snowball_funicular/snowball_funicular_arrow_blue.mtl", 
 			},
 		}, 
 	},

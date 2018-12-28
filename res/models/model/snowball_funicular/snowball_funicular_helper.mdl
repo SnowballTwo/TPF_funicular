@@ -1,0 +1,42 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 0.0, 1.0, 1.0, },
+		bbMin = { -0.0, 0.0, -1.0, },
+	},
+	collider = {
+		params = {
+			
+		},
+		type = "MESH",
+	},
+	lods = {
+		{
+			children = {
+				{
+					id = "snowball_funicular/snowball_funicular_helper.msh",
+					transf = {
+						1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 
+					},
+					type = "MESH",
+				}, 
+			},
+			matConfigs = {
+				{ 0, }, 
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 2500,
+		}, 
+	},
+	metadata = {
+		availability = {
+			yearFrom = 0,
+			yearTo = 0,
+		},
+		cost = {
+			price = 0,
+		},
+	},
+}
+end

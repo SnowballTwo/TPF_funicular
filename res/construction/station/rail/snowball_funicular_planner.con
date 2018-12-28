@@ -32,6 +32,12 @@ function data()
                 defaultIndex = 0
             },
             {
+                key = "snowball_funicular_helper",
+                name = _("snowball_funicular_helper"),
+                values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x"},
+                defaultIndex = 0
+            },
+            {
                 key = "snowball_funicular_type",
                 name = _("snowball_funicular_type"),
                 values = {_("snowball_funicular_type_wood"), _("snowball_funicular_type_stone")},
@@ -46,7 +52,7 @@ function data()
             {
                 key = "snowball_funicular_slope_sign",
                 name = _("snowball_funicular_slope_sign"),
-                values = {_("+"), _("-")},
+                values = {_("snowball_funicular_slope_sign_positive"), _("snowball_funicular_slope_sign_negative"),  _("snowball_funicular_slope_sign_auto")},
                 defaultIndex = 0
             },
             {
@@ -60,7 +66,7 @@ function data()
                 name = _("snowball_funicular_slope_1"),
                 values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
                 defaultIndex = 0
-            }
+            }            
         },
         updateFn = function(params)
             local result = {
@@ -79,12 +85,20 @@ function data()
             local type = params.snowball_funicular_type
             local rack = params.snowball_funicular_rack == 1
             local slope = params.snowball_funicular_slope_10 * 10 + params.snowball_funicular_slope_1
-            if params.snowball_funicular_slope_sign > 0 then
+            local helper = params.snowball_funicular_helper
+            if params.snowball_funicular_slope_sign == 1 then
                 slope = slope * -1
+            elseif params.snowball_funicular_slope_sign == 2 then
+                slope = nil
             end
+            
+            funicular.updateStations()
 
+            if not params.snowball_funicular_upgrade then
+                funicular.upgradeStations(helper)
+            end
             if mode == "plan" then
-                funicular.plan(slope, type, rack, result)
+                funicular.plan(slope, type, rack, helper, result)
             elseif mode == "build" then
                 funicular.build(result)
             elseif mode == "reset" then

@@ -13,7 +13,10 @@ local funicular = {}
 funicular.segmentLength = 2
 funicular.segmentWidth = 4
 funicular.segmentHeight = 0.3 + 0.08 + 0.15
-
+funicular.slopePositive = 0
+funicular.slopeNegative = 1
+funicular.slopeAuto = 2
+funicular.stationStore = {}
 funicular.trackTypeWood = 0
 funicular.trackTypeConcrete = 1
 
@@ -253,7 +256,7 @@ function funicular.buildTrack(points, startDirection, endDirection, asEdge, type
             local snapNodes = {}
             if snap and i == 1 then
                 snapNodes = {0}
-            elseif snap and i ==  #points - 1 then
+            elseif snap and i == #points - 1 then
                 snapNodes = {1}
             end
 
@@ -342,19 +345,44 @@ local function compareBySeed(a, b)
     return tonumber(a.params.seed) < tonumber(b.params.seed)
 end
 
-function funicular.getStations()
+function funicular.updateStations()
+    local position = game.gui.getTerrainPos()
     local constructions =
         game.interface.getEntities(
-        {pos = {0, 0}, radius = 900000},
+        {pos = position, radius = 50},
         {type = "CONSTRUCTION", includeData = true, fileName = "station/rail/snowball_funicular_planner.con"}
     )
-    local stations = {}
-    for id, data in pairs(constructions) do        
-        stations[#stations + 1] = data        
-    end
-    table.sort(stations, compareBySeed)
 
-    return stations
+    for id, data in pairs(constructions) do
+        local exists = false
+
+        for i = 1, #funicular.stationStore do
+            if (funicular.stationStore[i].id == id) then
+                exists = true
+            end
+        end
+
+        if not exists then
+            funicular.stationStore[#funicular.stationStore + 1] = data
+        end
+    end
+
+    local removedIndices = {}
+
+    for i = 1, #funicular.stationStore do
+        local data = game.interface.getEntity(funicular.stationStore[i].id)
+        if not data or data.fileName ~= "station/rail/snowball_funicular_planner.con" then
+            removedIndices[#removedIndices + 1] = i
+        else
+            funicular.stationStore[i] = data
+        end
+    end
+
+    for i = 1, #removedIndices do
+        table.remove(funicular.stationStore, removedIndices[i] - i + 1)
+    end
+
+    return funicular.stationStore
 end
 
 function funicular.getValuesFromStations(stations)
@@ -455,43 +483,92 @@ function funicular.getPolygon(points)
 end
 
 function funicular.checkAngles(points)
-    
     for i = 1, #points - 2 do
-
-        local a = vec2.sub(points[i+1], points[i])
-        local b = vec2.sub(points[i+2], points[i+1])
+        local a = vec2.sub(points[i + 1], points[i])
+        local b = vec2.sub(points[i + 2], points[i + 1])
         local la = vec2.length(a)
         local lb = vec2.length(b)
-        local angle = math.acos(vec2.dot(a,b) / ( la * lb))
+        local angle = math.acos(vec2.dot(a, b) / (la * lb))
         local d = math.sin(angle) * funicular.segmentWidth
-        
+
         if d > la or d > lb then
             return false
-        end        
+        end
     end
 
     return true
 end
 
-function funicular.plan(slope, type, rack, result)
-    local modelPoints =
-        spline.linearByLength({0.0, -10, -10 * slope / 100}, {0.0, 10, 10 * slope / 100}, funicular.segmentLength)
+function funicular.updateAutomaticSlope(station, params)
+    local s = 20
+    local m = mat3.fromView(station.transf)
+    local p = {station.transf[13], station.transf[14], station.transf[15]}
+    local a = vec3.add(p, mat3.transform(m, {0, -0.5 * s, 0}))
+    local b = vec3.add(p, mat3.transform(m, {0, 0.5 * s, 0}))
 
-    
-    local arrowtrans = transf.rotZYXTransl({x = 0, y = 0, z = math.asin( slope / 100 )}, {x = 0, y = 0, z=5 })
+    a[3] = game.interface.getHeight(a)
+    b[3] = game.interface.getHeight(b)
+
+    local sign = 0
+    if a[3] > b[3] then
+        sign = 1
+    end
+
+    local slope = math.floor(math.min(99, math.abs((b[3] - a[3]) * 5)))
+
+    params.snowball_funicular_slope_sign = sign
+    params.snowball_funicular_slope_10 = slope / 10
+    params.snowball_funicular_slope_1 = slope % 10
+    params.snowball_funicular_upgrade = 1
+end
+
+function funicular.upgradeStations(helper)
+    local stations = funicular.stationStore
+    for i = 1, #stations do
+        local station = stations[i]
+        local changed = false
+        local params = {
+            snowball_funicular_mode = 0,
+            snowball_funicular_helper = station.params.snowball_funicular_helper,
+            snowball_funicular_type = station.params.snowball_funicular_type,
+            snowball_funicular_rack = station.params.snowball_funicular_rack,
+            snowball_funicular_slope_sign = station.params.snowball_funicular_slope_sign,
+            snowball_funicular_slope_10 = station.params.snowball_funicular_slope_10,
+            snowball_funicular_slope_1 = station.params.snowball_funicular_slope_1
+        }
+
+        if station.params.snowball_funicular_slope_sign == funicular.slopeAuto then
+            funicular.updateAutomaticSlope(station, params)
+            changed = true
+        end
+
+        if changed then
+            game.interface.upgradeConstruction(station.id, "station/rail/snowball_funicular_planner.con", params)
+        end
+    end
+end
+
+function funicular.plan(slope, type, rack, helper, result)
+    local slopeTrans = transf.rotZYXTransl({x = 0, y = 0, z = math.atan((slope or 0) / 100)}, {x = 0, y = 0, z = 0})
+    local arrowtrans = transf.mul(transf.transl({x = 0, y = 0, z = 5}), slopeTrans)
 
     --[[
+        nil: automatic slope
         8: max slope to build
         11: max slope to snap
         30: arbitary high slope
     ]]
-
-    if math.abs( slope ) <= 11 then
+    if not slope then
+        result.models[#result.models + 1] = {
+            id = "snowball_funicular/snowball_funicular_arrow_blue.mdl",
+            transf = arrowtrans
+        }
+    elseif math.abs(slope) <= 11 then
         result.models[#result.models + 1] = {
             id = "snowball_funicular/snowball_funicular_arrow_green.mdl",
             transf = arrowtrans
         }
-    elseif math.abs( slope ) <= 30 then
+    elseif math.abs(slope) <= 30 then
         result.models[#result.models + 1] = {
             id = "snowball_funicular/snowball_funicular_arrow_yellow.mdl",
             transf = arrowtrans
@@ -503,8 +580,21 @@ function funicular.plan(slope, type, rack, result)
         }
     end
 
-    funicular.buildTrack(modelPoints, {0.0, 1, 0.0}, {0.0, 1, 0.0}, math.abs( slope ) <= 8, type, rack, true, result)
-    local stations = funicular.getStations()
+    if slope then
+        local modelPoints =
+            spline.linearByLength({0.0, -10, -10 * slope / 100}, {0.0, 10, 10 * slope / 100}, funicular.segmentLength)
+        funicular.buildTrack(modelPoints, {0.0, 1, 0.0}, {0.0, 1, 0.0}, math.abs(slope) <= 8, type, rack, true, result)
+    end
+
+    if helper and helper > 0 then
+        local helperTrans = transf.mul(slopeTrans, transf.scale({x = 100 * helper, y = 100 * helper, z = 100 * helper}))
+        result.models[#result.models + 1] = {
+            id = "snowball_funicular/snowball_funicular_helper.mdl",
+            transf = helperTrans
+        }
+    end
+
+    local stations = funicular.stationStore
     local values = funicular.getValuesFromStations(stations)
     if not values then
         return
@@ -519,7 +609,7 @@ function funicular.plan(slope, type, rack, result)
     end
 
     local anglesOk = funicular.checkAngles(points)
-    
+
     local color = {0.9, 0.7, 0.3, 1}
     if not anglesOk then
         color = {1.0, 0.2, 0.1, 1}
@@ -536,13 +626,11 @@ function funicular.build(result)
         transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
     }
 
-    local stations = funicular.getStations()
+    local stations = funicular.stationStore
     local values = funicular.getValuesFromStations(stations)
     if not values then
         return
     end
-
-    
 
     for i = 1, #stations do
         game.interface.bulldoze(stations[i].id)
@@ -592,7 +680,7 @@ function funicular.reset(result)
         transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
     }
 
-    local stations = funicular.getStations()
+    local stations = funicular.stationStore
     local values = funicular.getValuesFromStations(stations)
     if not values then
         return
