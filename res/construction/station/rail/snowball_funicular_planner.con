@@ -1,11 +1,88 @@
-local colliderutil = require "colliderutil"
-local funicular = require "snowball_funicular"
-local vec2 = require "snowball_funicular_vec2"
-local vec3 = require "snowball_funicular_vec3"
-local mat3 = require "snowball_funicular_mat3"
-local spline = require "snowball_funicular_spline"
 
+local funicular = require "snowball_funicular"
 local modes = {"plan", "build", "reset"}
+
+local function createParams()
+    local params = {}
+    params[#params + 1] = {
+        key = "snowball_funicular_mode",
+        name = _("snowball_funicular_mode"),
+        values = {
+            _("snowball_funicular_mode_plan"),
+            _("snowball_funicular_mode_build"),
+            _("snowball_funicular_mode_reset")
+        },
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_helper",
+        name = _("snowball_funicular_helper"),
+        values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x"},
+        defaultIndex = 0
+    }
+    if (funicular.trackParams) then        
+        funicular.trackParams:createUIParams(params)        
+    else
+        params[#params + 1] = {
+            key = "snowball_funicular_type",
+            name = _("snowball_funicular_type"),
+            values = {_("snowball_funicular_type_wood"), _("snowball_funicular_type_stone")},
+            defaultIndex = 0
+        }
+
+        params[#params + 1] = {
+            key = "catenary",
+            name = _("Catenary"),
+            values = { _("No"), _("Yes") },
+            defaultIndex = 1,
+            yearFrom = 1910,
+            yearTo = 0
+        }
+    end
+
+    params[#params + 1] = {
+        key = "snowball_funicular_tracks",
+        name = _("snowball_funicular_tracks"),
+        values = {"A", "AB", "A-B"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_length",
+        name = _("snowball_funicular_length"),
+        values = {"20", "40", "60", "80", "160"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_rack",
+        name = _("snowball_funicular_rack"),
+        values = {_("snowball_funicular_rack_no"), _("snowball_funicular_rack_yes")},
+        defaultIndex = 1
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_sign",
+        name = _("snowball_funicular_slope_sign"),
+        values = {
+            _("snowball_funicular_slope_sign_positive"),
+            _("snowball_funicular_slope_sign_negative"),
+            _("snowball_funicular_slope_sign_auto")
+        },
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_10",
+        name = _("snowball_funicular_slope_10"),
+        values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_1",
+        name = _("snowball_funicular_slope_1"),
+        values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
+        defaultIndex = 0
+    }
+
+    return params
+end
 
 function data()
     return {
@@ -20,54 +97,7 @@ function data()
         order = 197720809,
         skipCollision = true,
         autoRemovable = false,
-        params = {
-            {
-                key = "snowball_funicular_mode",
-                name = _("snowball_funicular_mode"),
-                values = {
-                    _("snowball_funicular_mode_plan"),
-                    _("snowball_funicular_mode_build"),
-                    _("snowball_funicular_mode_reset")
-                },
-                defaultIndex = 0
-            },
-            {
-                key = "snowball_funicular_helper",
-                name = _("snowball_funicular_helper"),
-                values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x"},
-                defaultIndex = 0
-            },
-            {
-                key = "snowball_funicular_type",
-                name = _("snowball_funicular_type"),
-                values = {_("snowball_funicular_type_wood"), _("snowball_funicular_type_stone")},
-                defaultIndex = 0
-            },
-            {
-                key = "snowball_funicular_rack",
-                name = _("snowball_funicular_rack"),
-                values = {_("snowball_funicular_rack_no"), _("snowball_funicular_rack_yes")},
-                defaultIndex = 1
-            },
-            {
-                key = "snowball_funicular_slope_sign",
-                name = _("snowball_funicular_slope_sign"),
-                values = {_("snowball_funicular_slope_sign_positive"), _("snowball_funicular_slope_sign_negative"),  _("snowball_funicular_slope_sign_auto")},
-                defaultIndex = 0
-            },
-            {
-                key = "snowball_funicular_slope_10",
-                name = _("snowball_funicular_slope_10"),
-                values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
-                defaultIndex = 0
-            },
-            {
-                key = "snowball_funicular_slope_1",
-                name = _("snowball_funicular_slope_1"),
-                values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
-                defaultIndex = 0
-            }            
-        },
+        params = createParams(),
         updateFn = function(params)
             local result = {
                 models = {},
@@ -82,23 +112,25 @@ function data()
             }
 
             local mode = modes[params.snowball_funicular_mode + 1]
-            local type = params.snowball_funicular_type
+            local trackType = funicular.getTrackType(params)
             local rack = params.snowball_funicular_rack == 1
             local slope = params.snowball_funicular_slope_10 * 10 + params.snowball_funicular_slope_1
             local helper = params.snowball_funicular_helper
+            local tracks = funicular.trackPositions[params.snowball_funicular_tracks + 1]
+            local length = funicular.lengths[params.snowball_funicular_length + 1]
             if params.snowball_funicular_slope_sign == 1 then
                 slope = slope * -1
             elseif params.snowball_funicular_slope_sign == 2 then
                 slope = nil
             end
-            
+
             funicular.updateStations()
 
             if not params.snowball_funicular_upgrade then
                 funicular.upgradeStations(helper)
             end
             if mode == "plan" then
-                funicular.plan(slope, type, rack, helper, result)
+                funicular.plan(slope, length, tracks, trackType, rack, helper, result)
             elseif mode == "build" then
                 funicular.build(result)
             elseif mode == "reset" then

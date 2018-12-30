@@ -12,6 +12,7 @@ function data()
 		Gelb: 11 - 30 % Steigung - Es können keine Gleise angebaut werden\n\z
 		Rot: 31-90 % Steigung - Schwache Loks bekommen Probleme",
 		snowball_funicular_rack_description = "Fügt dem Gleis eine Zahnstange hinzu.",
+		snowball_funicular_tracks = "Gleise",
 		snowball_funicular_direction = "Richtung",
 		snowball_funicular_radius_100 = "Radius ( 100m )",
 		snowball_funicular_radius_10 = "Radius ( 10m )",
@@ -52,6 +53,7 @@ function data()
 		Red: 31-90 % slope - weak engines might have problems",	
 		snowball_funicular_rack_description = "Adds a rack to the track.",
 		snowball_funicular_direction = "direction",
+		snowball_funicular_tracks = "tracks",
 		snowball_funicular_radius_100 = "radius ( 100m )",
 		snowball_funicular_radius_10 = "radius ( 10m )",
 		snowball_funicular_length_100 = "length ( 100m )",

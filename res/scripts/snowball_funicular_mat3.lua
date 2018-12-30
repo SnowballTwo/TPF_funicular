@@ -98,6 +98,10 @@ end
 
 function mat3.solve(A, b)
     local denominator = mat3.det(A)
+    if denominator == 0 then
+        return nil
+    end
+
     local x1 =
         mat3.det(
         {

@@ -1,3 +1,4 @@
+
 local vec3 = { }
 
 function vec3.add(a, b)
@@ -21,6 +22,12 @@ function vec3.cross(a, b)
 		a[2] * b[3] - a[3] * b[2],
 		a[3] * b[1] - a[1] * b[3],
 		a[1] * b[2] - a[2] * b[1] }
+end
+
+function vec3.equals(a,b)
+	return a[1] == b[1]
+	and a[2] == b[2]
+	and a[3] == b[3]
 end
 
 function vec3.length(v)
