@@ -2,7 +2,7 @@ local colliderutil = require "colliderutil"
 local constructionutil = require "constructionutil"
 local funicular = require "snowball_funicular"
 local vec2 = require "snowball_funicular_vec2"
-local vec3 = require "snowball_funicular_vec3"
+local build = require "snowball_funicular_build"
 local directions = {1, 0, -1}
 
 function data()
@@ -54,7 +54,7 @@ function data()
                 local p1 = { i * funicular.segmentLength, 0, i * funicular.segmentLength * slope + 0.54}
                 local p2 = { (i + 1) * funicular.segmentLength,0, (i + 1) * funicular.segmentLength * slope + 0.54}
 
-                funicular.buildSegment(p1, p2, "asset/tracks/snowball_track_rack.mdl", {1, funicular.segmentLength , 1}, result)
+                build.affine(p1, p2, "asset/tracks/snowball_track_rack.mdl", {1, funicular.segmentLength , 1}, result)
             end
             return result
         end

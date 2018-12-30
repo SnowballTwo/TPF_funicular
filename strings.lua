@@ -12,6 +12,8 @@ function data()
 		Gelb: 11 - 30 % Steigung - Es können keine Gleise angebaut werden\n\z
 		Rot: 31-90 % Steigung - Schwache Loks bekommen Probleme",
 		snowball_funicular_rack_description = "Fügt dem Gleis eine Zahnstange hinzu.",
+		snowball_funicular_ramp = "Steilrampe",
+		snowball_funicular_ramp_description = "Erstellt eine schräge Ebene in der Landschaft",
 		snowball_funicular_tracks = "Gleise",
 		snowball_funicular_direction = "Richtung",
 		snowball_funicular_radius_100 = "Radius ( 100m )",
@@ -19,6 +21,8 @@ function data()
 		snowball_funicular_length_100 = "Länge ( 100m )",
 		snowball_funicular_length_10 = "Länge ( 10m )",
 		snowball_funicular_length = "Länge ( m )",
+		snowball_funicular_width_100 = "Breite ( 100m )",
+		snowball_funicular_width_10 = "Breite ( 10m )",
 		snowball_funicular_slope_10 = "Steigung ( 10% )",
 		snowball_funicular_slope_1 = "Steigung ( 1% )",
 		snowball_funicular_slope_percent = "Steigung ( % )",
@@ -51,6 +55,8 @@ function data()
 		Green: 0 - 11 % slope - snapping is possible\n\z
 		Yellow: 11 - 30 % slope - snapping is not possible\n\z
 		Red: 31-90 % slope - weak engines might have problems",	
+		snowball_funicular_ramp = "Sloped ramp",
+		snowball_funicular_ramp_description = "Creates a sloped plane in the landscape",
 		snowball_funicular_rack_description = "Adds a rack to the track.",
 		snowball_funicular_direction = "direction",
 		snowball_funicular_tracks = "tracks",
@@ -59,6 +65,8 @@ function data()
 		snowball_funicular_length_100 = "length ( 100m )",
 		snowball_funicular_length_10 = "length ( 10m )",
 		snowball_funicular_length = "length ( m )",
+		snowball_funicular_width_100 = "width ( 100m )",
+		snowball_funicular_width_10 = "width ( 10m )",
 		snowball_funicular_slope_10 = "slope ( 10% )",
 		snowball_funicular_slope_1 = "slope ( 1% )",
 		snowball_funicular_slope_percent = "slope ( % )",

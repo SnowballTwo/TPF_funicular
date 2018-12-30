@@ -544,7 +544,8 @@ function funicular.plan(slope, length, tracks, type, rack, helper, result)
     end
 
     if helper and helper > 0 then
-        local helperTrans = transf.mul(slopeTrans, transf.scale({x = 100 * helper, y = 100 * helper, z = 100 * helper}))
+        local scale = math.pow(2, helper - 1)
+        local helperTrans = transf.mul(slopeTrans, transf.scale({x = 100 * scale, y = 100 * scale, z = 100 * scale}))
         result.models[#result.models + 1] = {
             id = "snowball_funicular/snowball_funicular_helper.mdl",
             transf = helperTrans

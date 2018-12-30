@@ -17,7 +17,7 @@ local function createParams()
     params[#params + 1] = {
         key = "snowball_funicular_helper",
         name = _("snowball_funicular_helper"),
-        values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x"},
+        values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x", "16x"},
         defaultIndex = 0
     }
     if (funicular.trackParams) then        

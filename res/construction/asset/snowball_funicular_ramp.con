@@ -1,0 +1,86 @@
+local function createParams()
+    local params = {}
+
+    params[#params + 1] = {
+        key = "snowball_funicular_length_100",
+        name = _("snowball_funicular_length_100"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 1
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_length_10",
+        name = _("snowball_funicular_length_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_width_100",
+        name = _("snowball_funicular_width_100"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_width_10",
+        name = _("snowball_funicular_width_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 5
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_10",
+        name = _("snowball_funicular_slope_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_1",
+        name = _("snowball_funicular_slope_1"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+
+    return params
+end
+
+function data()
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("snowball_funicular_ramp"),
+            description = _("snowball_funicular_ramp_description")
+        },
+        categories = {"snowball_funicular"},
+        buildMode = "MULTI",
+        availability = {},
+        order = 1977208010,
+        skipCollision = true,
+        autoRemovable = false,
+        params = createParams(),
+        updateFn = function(params)
+            
+            local result = {
+                models = {},
+                terrainAlignmentLists = {}
+            }
+
+            result.models[#result.models + 1] = {
+                id = "asset/snowball_funicular_suspensor.mdl",
+                transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+            }
+
+            local length = math.max(10, 100 * (params.snowball_funicular_length_100) + 10 * (params.snowball_funicular_length_10))
+            local width = math.max(10, 100 * (params.snowball_funicular_width_100) + 10 * (params.snowball_funicular_width_10))
+            local slope = 0.1 * (params.snowball_funicular_slope_10) + 0.01 * (params.snowball_funicular_slope_1)
+
+            local points = {{-0.5 * width, 0, 0}, {0.5 * width, 0, 0}, {0.5 * width, length, length * slope}, {-0.5 * width, length, length * slope}}
+
+            result.terrainAlignmentLists[#result.terrainAlignmentLists + 1] = {
+                type = "EQUAL",
+                faces = {points},
+                slopeLow = 4,
+                slopeHigh = 4
+            }
+
+            return result
+        end
+    }
+end
