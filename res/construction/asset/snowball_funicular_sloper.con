@@ -1,0 +1,146 @@
+local sloper = require "snowball_funicular_sloper"
+
+local function createParams()
+    local params = {}
+
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_mode",
+        name = _("snowball_funicular_sloper_mode"),
+        values = {_("snowball_funicular_sloper_mode_pick"), _("snowball_funicular_sloper_mode_drop")},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_sign",
+        name = _("snowball_funicular_slope_sign"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_10",
+        name = _("snowball_funicular_10_percent"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_slope_1",
+        name = _("snowball_funicular_1_percent"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_slope_mode",
+        name = _("snowball_funicular_sloper_slope_mode"),
+        values = {_("snowball_funicular_sloper_slope_mode_rotate"), _("snowball_funicular_sloper_slope_mode_shear")},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_y_sign",
+        name = _("snowball_funicular_offset_y"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_y_10",
+        name = _("snowball_funicular_distance_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_y_1",
+        name = _("snowball_funicular_distance_1"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_y_01",
+        name = _("snowball_funicular_distance_01"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_z_sign",
+        name = _("snowball_funicular_offset_z"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_z_10",
+        name = _("snowball_funicular_distance_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_z_1",
+        name = _("snowball_funicular_distance_1"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_z_01",
+        name = _("snowball_funicular_distance_01"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+
+    return params
+end
+
+function data()
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("snowball_funicular_sloper"),
+            description = _("snowball_funicular_sloper_description")
+        },
+        categories = {"snowball_funicular"},
+        buildMode = "MULTI",
+        availability = {},
+        order = 1977208010,
+        skipCollision = true,
+        autoRemovable = false,
+        params = createParams(),
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {},
+                        slopeLow = 1,
+                        slopeHigh = 1
+                    }
+                }
+            }
+
+            local mode = params.snowball_funicular_sloper_mode
+            local slope =
+                sloper.signs[(params.snowball_funicular_slope_sign or 0) + 1] *
+                (0.1 * (params.snowball_funicular_slope_10 or 0) + 0.01 * (params.snowball_funicular_slope_1 or 0))
+
+            local slopeMode = params.snowball_funicular_sloper_slope_mode or 0
+
+            local offsety =
+                sloper.signs[(params.snowball_funicular_offset_y_sign or 0) + 1] *
+                (10 * (params.snowball_funicular_offset_y_10 or 0) + 
+                1 * (params.snowball_funicular_offset_y_1 or 0) + 
+                0.1 * (params.snowball_funicular_offset_y_01 or 0))
+
+            local offsetz =
+                sloper.signs[(params.snowball_funicular_offset_z_sign or 0) + 1] *
+                (10 * (params.snowball_funicular_offset_z_10 or 0) + 
+                1 * (params.snowball_funicular_offset_z_1 or 0) + 
+                0.1 * (params.snowball_funicular_offset_z_01 or 0))
+
+            if mode == sloper.pickMode then
+                sloper.pick(result, slope, slopeMode, offsety, offsetz)
+            elseif mode == sloper.dropMode then
+                sloper.drop(result)
+            elseif mode == sloper.hideMode then
+                sloper.hide(result)
+            else
+            end
+
+            return result
+        end
+    }
+end

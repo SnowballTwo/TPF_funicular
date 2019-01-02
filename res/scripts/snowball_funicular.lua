@@ -263,6 +263,7 @@ function funicular.buildTrack(points, startDirection, endDirection, asEdge, type
 end
 
 function funicular.updateStations()
+
     local position = game.gui.getTerrainPos()
     local constructions =
         game.interface.getEntities(
@@ -583,6 +584,7 @@ function funicular.plan(slope, length, tracks, type, rack, helper, result)
 end
 
 function funicular.build(result)
+
     result.models[#result.models + 1] = {
         id = "asset/snowball_funicular_suspensor.mdl",
         transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
