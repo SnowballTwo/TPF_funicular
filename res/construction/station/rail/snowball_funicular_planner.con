@@ -1,5 +1,6 @@
 
 local funicular = require "snowball_funicular"
+local linq = require "snowball_funicular_linq"
 local modes = {"plan", "build", "reset"}
 
 local function createParams()
@@ -20,6 +21,21 @@ local function createParams()
         values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x", "16x"},
         defaultIndex = 0
     }
+ 
+    params[#params + 1] = {
+        key = "snowball_funicular_length",
+        name = _("snowball_funicular_length"),
+        values =  linq.select(funicular.lengths, tostring),
+        defaultIndex = 2
+    }
+
+    params[#params + 1] = {
+        key = "snowball_funicular_tracks",
+        name = _("snowball_funicular_tracks"),
+        values = {"A", "AB", "A-B"},
+        defaultIndex = 0
+    }
+
     if (funicular.trackParams) then        
         funicular.trackParams:createUIParams(params)        
     else
@@ -41,17 +57,12 @@ local function createParams()
     end
 
     params[#params + 1] = {
-        key = "snowball_funicular_tracks",
-        name = _("snowball_funicular_tracks"),
-        values = {"A", "AB", "A-B"},
+        key = "snowball_funicular_transition",
+        name = _("snowball_funicular_transition"),
+        values = linq.select(funicular.transitions, function(transition) return transition.name end),
         defaultIndex = 0
     }
-    params[#params + 1] = {
-        key = "snowball_funicular_length",
-        name = _("snowball_funicular_length"),
-        values = {"20", "40", "60", "80", "160"},
-        defaultIndex = 0
-    }
+
     params[#params + 1] = {
         key = "snowball_funicular_rack",
         name = _("snowball_funicular_rack"),
@@ -70,16 +81,16 @@ local function createParams()
     }
     params[#params + 1] = {
         key = "snowball_funicular_slope_10",
-        name = _("snowball_funicular_slope_10"),
+        name = _("snowball_funicular_10_percent"),
         values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
         defaultIndex = 0
     }
     params[#params + 1] = {
         key = "snowball_funicular_slope_1",
-        name = _("snowball_funicular_slope_1"),
+        name = _("snowball_funicular_1_percent"),
         values = {_("0"), _("1"), _("2"), _("3"), _("4"), _("5"), _("6"), _("7"), _("8"), _("9")},
         defaultIndex = 0
-    }
+    }    
 
     return params
 end
@@ -117,7 +128,7 @@ function data()
             local slope = params.snowball_funicular_slope_10 * 10 + params.snowball_funicular_slope_1
             local helper = params.snowball_funicular_helper
             local tracks = funicular.trackPositions[params.snowball_funicular_tracks + 1]
-            local length = funicular.lengths[params.snowball_funicular_length + 1]
+            local length = funicular.lengths[params.snowball_funicular_length + 1]           
             if params.snowball_funicular_slope_sign == 1 then
                 slope = slope * -1
             elseif params.snowball_funicular_slope_sign == 2 then

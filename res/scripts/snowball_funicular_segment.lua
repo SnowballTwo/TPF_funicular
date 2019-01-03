@@ -6,7 +6,7 @@ local build = require "snowball_funicular_build"
 Segment = {}
 Segment.__index = Segment
 
-function Segment:Create(p1, p2, d1, d2, type, tracksStart, tracksEnd, catenary, snapStart, snapEnd, rack)
+function Segment:Create(p1, p2, d1, d2, type, tracksStart, tracksEnd, catenary, snapStart, snapEnd, rack, transition)
     local segment = {
         p1 = p1,
         p2 = p2,
@@ -18,7 +18,8 @@ function Segment:Create(p1, p2, d1, d2, type, tracksStart, tracksEnd, catenary, 
         catenary = catenary or false,
         snapStart = snapStart or false,
         snapEnd = snapEnd or false,
-        rack = rack or false
+        rack = rack or false,
+        transition = transition
     }
     setmetatable(segment, Segment)
     return segment
@@ -77,7 +78,7 @@ function Segment:BuildEdges(result)
                 local d1 = vec3.mul(l, self.d1)
                 local d2 = vec3.mul(l, self.d2)
 
-                result.edgeLists[#result.edgeLists + 1] = {
+                local edge = {
                     type = "TRACK",
                     params = {
                         catenary = self.catenary,
@@ -90,6 +91,13 @@ function Segment:BuildEdges(result)
                     freeNodes = {0, 1},
                     snapNodes = snapNodes
                 }
+
+                if self.transition and self.transition.type and self.transition.config then
+                    edge.edgeType = self.transition.type
+                    edge.edgeTypeName = self.transition.config
+                end
+
+                result.edgeLists[#result.edgeLists + 1] = edge
 
                 if self.rack and ( #self.tracksEnd == #self.tracksStart or self:IsFlat()) then
                     buildRack(p1, p2, d1, d2, result)

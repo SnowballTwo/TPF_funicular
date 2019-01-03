@@ -17,11 +17,10 @@ function data()
 		snowball_funicular_sloper = "Transformier-Stempel",
 		snowball_funicular_sloper_description = "Kann genutzt werden, um ein beliebiges Modell zu kopieren und zu transformieren.\n\z
 		-----------------------------------------\n\z
-		Schritt 1: Im Modus 'Aufnehmen' in der Nähe des Gewünschten Modells platzieren. War die Aktion erfolgreich, verwandelt sich der Stempel in das Modell\n\z
+		Schritt 1: Im Modus 'Aufnehmen' in der Nähe des gewünschten Modells platzieren. War die Aktion erfolgreich, verwandelt sich der Stempel in das Modell\n\z
 		Schritt 2: Das Modell mit den Parametern transformieren und platzieren.\n\z
 		Schritt 3: Um ein anderes Modell aufzunehmen, einmal auf 'Ablegen' klicken.\n\z",
-		snowball_funicular_tracks = "Gleise",
-		snowball_funicular_direction = "Richtung",
+		snowball_funicular_tracks = "\n======== Gleise ========",		
 		snowball_funicular_radius_100 = "Radius ( 100 m )",
 		snowball_funicular_radius_10 = "Radius ( 10 m )",
 		snowball_funicular_length_100 = "Länge ( 100 m )",
@@ -34,11 +33,16 @@ function data()
 		snowball_funicular_10_percent = " 10 %",
 		snowball_funicular_1_percent = "1 %",
 		snowball_funicular_slope_percent = "Steigung ( % )",
+		snowball_funicular_transition = "Übergang",
+		snowball_funicular_transition_earth = "Erde",
+		snowball_funicular_transition_stone_bridge = "Steinbrücke",
+		snowball_funicular_transition_empty_bridge = "Leere Brücke",
+		snowball_funicular_transition_tunnel = "Tunnel",
 		snowball_funicular_slope_sign = "\n======== Steigung ========",
 		snowball_funicular_slope_sign_positive = "Aufwärts",
 		snowball_funicular_slope_sign_negative = "Abwärts",
 		snowball_funicular_slope_sign_auto = "Auto",
-		snowball_funicular_mode = "Modus",
+		snowball_funicular_mode = "======== Planung ========",
 		snowball_funicular_mode_plan = "Planen",
 		snowball_funicular_mode_reset = "Reset",
 		snowball_funicular_mode_build = "Bauen",
@@ -83,9 +87,8 @@ function data()
 		-----------------------------------------\n\z
 		Schritt 1: Place the white stamp next to your desired model in 'pick' mode. If picking was successful, the stamp becomes the model.\n\z
 		Schritt 2: Transform the model with the parameters and place it.\n\z
-		Schritt 3: To pick up another model, click 'drop' before\n\z",
-		snowball_funicular_direction = "direction",
-		snowball_funicular_tracks = "tracks",
+		Schritt 3: To pick up another model, click 'drop' before\n\z",		
+		snowball_funicular_tracks = "\n======== tracks ========",
 		snowball_funicular_radius_100 = "radius ( 100m )",
 		snowball_funicular_radius_10 = "radius ( 10m )",
 		snowball_funicular_length_100 = "length ( 100m )",
@@ -98,11 +101,16 @@ function data()
 		snowball_funicular_slope_percent = "slope ( % )",
 		snowball_funicular_10_percent = " 10 %",
 		snowball_funicular_1_percent = "1 %",
+		snowball_funicular_transition = "transition",
+		snowball_funicular_transition_earth = "earth",
+		snowball_funicular_transition_stone_bridge = "stone bridge",
+		snowball_funicular_transition_empty_bridge = "empty bridge",
+		snowball_funicular_transition_tunnel = "tunnel",
 		snowball_funicular_slope_sign = "\n======== slope ========",
 		snowball_funicular_slope_sign_positive = "upwards",
 		snowball_funicular_slope_sign_negative = "downwards",
 		snowball_funicular_slope_sign_auto = "auto",
-		snowball_funicular_mode = "mode",
+		snowball_funicular_mode = "======== planner ========",
 		snowball_funicular_mode_plan = "plan",
 		snowball_funicular_mode_reset = "reset",
 		snowball_funicular_mode_build = "build",

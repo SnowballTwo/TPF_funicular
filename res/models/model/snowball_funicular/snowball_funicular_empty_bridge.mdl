@@ -1,0 +1,23 @@
+--Copied from JoeFried's great ModBox, sorry, but i didn't want the dependency
+
+function data()
+return {
+	boundingInfo = { bbMax = { 0.01, 0.01, 0.01, }, bbMin = {-0.01, -0.01, -0.01, }, },
+	collider = { params = { }, type = "MESH", },
+	lods = {
+		{	
+		children = {
+			{ id = "snowball_funicular/snowball_funicular_empty_bridge.msh",
+			  transf = { 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 1,  },
+			  type = "MESH",
+			}, 
+			},
+			matConfigs = { { 0, },},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 1,			 
+		}, 
+	},
+	metadata = { },
+}
+end
