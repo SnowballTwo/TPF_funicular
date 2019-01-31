@@ -82,6 +82,63 @@ local function createParams()
         defaultIndex = 0
     }
 
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_x",
+        name = _("snowball_funicular_scale_x"),
+        values = {_("snowball_funicular_scale_up"), _("snowball_funicular_scale_down")},
+        defaultIndex = 0
+    }   
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_x_1",
+        name = _(""),
+        values = {"1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_x_01",
+        name = _(""),
+        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        defaultIndex = 0
+    }
+
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_y",
+        name = _("snowball_funicular_scale_y"),
+        values = {_("snowball_funicular_scale_up"), _("snowball_funicular_scale_down")},
+        defaultIndex = 0
+    }    
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_y_1",
+        name = _(""),
+        values = {"1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_y_01",
+        name = _(""),
+        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        defaultIndex = 0
+    }
+
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_z",
+        name = _("snowball_funicular_scale_z"),
+        values = {_("snowball_funicular_scale_up"), _("snowball_funicular_scale_down")},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_z_1",
+        name = _(""),
+        values = {"1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_scale_z_01",
+        name = _(""),
+        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        defaultIndex = 0
+    }
+
     return params
 end
 
@@ -121,18 +178,34 @@ function data()
 
             local offsety =
                 sloper.signs[(params.snowball_funicular_offset_y_sign or 0) + 1] *
-                (10 * (params.snowball_funicular_offset_y_10 or 0) + 
-                1 * (params.snowball_funicular_offset_y_1 or 0) + 
-                0.1 * (params.snowball_funicular_offset_y_01 or 0))
+                (10 * (params.snowball_funicular_offset_y_10 or 0) + 1 * (params.snowball_funicular_offset_y_1 or 0) +
+                    0.1 * (params.snowball_funicular_offset_y_01 or 0))
 
             local offsetz =
                 sloper.signs[(params.snowball_funicular_offset_z_sign or 0) + 1] *
-                (10 * (params.snowball_funicular_offset_z_10 or 0) + 
-                1 * (params.snowball_funicular_offset_z_1 or 0) + 
-                0.1 * (params.snowball_funicular_offset_z_01 or 0))
+                (10 * (params.snowball_funicular_offset_z_10 or 0) + 1 * (params.snowball_funicular_offset_z_1 or 0) +
+                    0.1 * (params.snowball_funicular_offset_z_01 or 0))
+
+            local scalex =
+                math.pow(
+                (params.snowball_funicular_scale_x_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_x_01 or 0),
+                sloper.signs[(params.snowball_funicular_scale_x or 0) + 1]
+            )
+
+            local scaley =
+                math.pow(
+                (params.snowball_funicular_scale_y_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_y_01 or 0),
+                sloper.signs[(params.snowball_funicular_scale_y or 0) + 1]
+            )
+
+            local scalez =
+                math.pow(
+                (params.snowball_funicular_scale_z_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_z_01 or 0),
+                sloper.signs[(params.snowball_funicular_scale_z or 0) + 1]
+            )
 
             if mode == sloper.pickMode then
-                sloper.pick(result, slope, slopeMode, offsety, offsetz)
+                sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley, scalez)
             elseif mode == sloper.dropMode then
                 sloper.drop(result)
             elseif mode == sloper.hideMode then

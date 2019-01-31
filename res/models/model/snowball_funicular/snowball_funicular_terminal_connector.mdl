@@ -1,0 +1,40 @@
+local laneutil = require "laneutil"
+
+function data()
+return {
+	collider = { params = {}, type = "MESH",},
+	lods = {
+		{
+			animations = {},
+			children = {
+				{
+					id = "asset/rock_2_9_lod_0.msh",
+					transf = {
+						.01, 0, 0, 0, 0, .01, 0, 0, 0, 0, .01, 0, 0, 0, 0, 1,
+					},
+					type = "MESH",
+				},  
+			},
+			events = {},
+			matConfigs = { { 0 } },
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 10,
+		}, 
+	},
+	metadata = {
+		transportNetworkProvider = {
+			laneLists = {
+				{
+					transportModes = { "PERSON" },
+					nodes  = laneutil.makeLanes({
+						{ {  0, 0, 0.8 }, { 1, -4.5, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, 4.61 },
+						{ {  0, 0, 0.8 }, { 1, 4.5, 0 }, { 1, 0, 0 }, { 1, 0, 0 }, 4.61 },                        
+					})
+				},	
+			},			
+		},
+	}	
+}
+end
+				

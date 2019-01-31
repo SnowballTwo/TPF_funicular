@@ -27,6 +27,8 @@ function data()
 		updateFn = function(params)
 			local result = {
 				models = {},
+				edgeLists = {},
+				terminalGroups = {},
 				cost = 10,
 				bulldozeCost = 10,
 				maintenanceCost = 0
@@ -49,40 +51,10 @@ function data()
 			if not segments or not params.forReal then
 				return result
 			end
-
-			result.edgeLists = {}
-
+	
 			for i = 1, #segments do
-				setmetatable(segments[i], segment)
-
-				if segments[i].station then
-					
-					local player = game.interface.getPlayer()
-					local id =
-						game.interface.buildConstruction(
-						"station/rail/snowball_funicular_station.con",
-						{
-							forReal = false,
-							segments = {segments[i]},
-							center = params.center							
-						},
-						{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, params.center[1], params.center[2], params.center[3], 1}
-					)
-
-					game.interface.setPlayer(id, player)
-
-					game.interface.upgradeConstruction(
-						id,
-						"station/rail/snowball_funicular_station.con",
-						{
-							forReal = true,
-							segments = {segments[i]},
-							center = params.center
-						}
-					)
-				else
-					segments[i]:BuildEdges(result)
-				end
+				setmetatable(segments[i], segment)			
+				segments[i]:BuildEdges(result)				
 			end
 
 			return result

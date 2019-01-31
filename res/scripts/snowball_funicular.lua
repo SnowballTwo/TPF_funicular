@@ -357,8 +357,10 @@ function funicular.getSegments(stations)
                 funicular.trackPositions[stations[i].params.snowball_funicular_tracks + 1],
                 funicular.getCatenary(stations[i].params),
                 true,
-                false,
-                stations[i].params.snowball_funicular_rack == 1
+                stations[i].params.isstation == 0,
+                stations[i].params.snowball_funicular_rack == 1,
+                nil,
+                stations[i].params.isstation == 0
             )
         end
 
@@ -373,10 +375,11 @@ function funicular.getSegments(stations)
                 funicular.trackPositions[stations[i].params.snowball_funicular_tracks + 1],
                 funicular.trackPositions[stations[i + 1].params.snowball_funicular_tracks + 1],
                 funicular.getCatenary(stations[i + 1].params),
-                false,
-                false,               
+                stations[i].params.isstation == 0,
+                stations[i + 1].params.isstation == 0,               
                 stations[i + 1].params.snowball_funicular_rack == 1,
-                funicular.transitions[stations[i + 1].params.snowball_funicular_transition + 1]
+                funicular.transitions[stations[i + 1].params.snowball_funicular_transition + 1],
+                false
             )
         end
 
@@ -390,9 +393,11 @@ function funicular.getSegments(stations)
             funicular.trackPositions[stations[i + 1].params.snowball_funicular_tracks + 1],
             funicular.trackPositions[stations[i + 1].params.snowball_funicular_tracks + 1],
             funicular.getCatenary(stations[i + 1].params),
-            false,
-            i == #stations - 1,
-            stations[i + 1].params.snowball_funicular_rack == 1
+            stations[i + 1].params.isstation == 0,
+            i == #stations - 1 or stations[i + 1].params.isstation == 0,
+            stations[i + 1].params.snowball_funicular_rack == 1,
+            nil,
+            stations[i + 1].params.isstation == 0
         )
     end
 
@@ -461,7 +466,7 @@ function funicular.updateAutomaticSlope(station, params)
         sign = 1
     end
 
-    local slope = math.floor(math.min(99, math.abs((b[3] - a[3]) * 5)))
+    local slope = math.floor(math.min(99, math.abs((b[3] - a[3]) * 100 / s)))
 
     params.snowball_funicular_slope_sign = sign
     params.snowball_funicular_slope_10 = slope / 10
@@ -482,6 +487,7 @@ function funicular.upgradeStations(helper)
             snowball_funicular_transition = station.params.snowball_funicular_transition,
             trackType = station.params.trackType,
             catenary = station.params.catenary,
+            isstation = station.params.isstation,
             snowball_funicular_length = station.params.snowball_funicular_length,
             snowball_funicular_tracks = station.params.snowball_funicular_tracks,
             snowball_funicular_rack = station.params.snowball_funicular_rack,
@@ -634,7 +640,8 @@ function funicular.build(result)
         "station/rail/snowball_funicular_track.con",
         {
             forReal = false,
-            segments = segments
+            segments = segments,
+            center = center
         },
         {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, center[1], center[2], center[3], 1}
     )
@@ -646,7 +653,8 @@ function funicular.build(result)
         "station/rail/snowball_funicular_track.con",
         {
             forReal = true,
-            segments = segments
+            segments = segments,
+            center = center
         }
     )
 end

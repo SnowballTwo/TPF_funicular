@@ -22,7 +22,7 @@ sloper.pickerId = "asset/snowball_funicular_picker.mdl"
 sloper.whitePickerId = "snowball_funicular/snowball_funicular_picker_white.mdl"
 sloper.greenPickerId = "snowball_funicular/snowball_funicular_picker_green.mdl"
 
-function sloper.pick(result, slope, slopeMode, offsety, offsetz)
+function sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley, scalez)
     local built =
         planner.updateEntityLists(
         {
@@ -52,15 +52,15 @@ function sloper.pick(result, slope, slopeMode, offsety, offsetz)
 
     if sloper.model then
         local transform =
-            transf.rotZYXTransl({x = 0, y = math.atan((slope or 0)), z = 0}, {x = 0, y = offsety, z = offsetz})
+            transf.scaleRotZYXTransl({x = scalex, y = scaley, z = scalez},{x = 0, y = math.atan((slope or 0)), z = 0}, {x = 0, y = offsety, z = offsetz})
 
         if slopeMode == sloper.slopeShear then            
             local shear = mat3.affine({1, 0, 0}, {0, 1, 0}, {0, 0, 1}, vec3.normalize({1, 0, -(slope or 0)}), {0, 1, 0}, {0, 0, 1})
             transform =
                 transf.new(
-                vec4.new(shear[1][1], shear[2][1], shear[3][1], .0),
-                vec4.new(shear[1][2], shear[2][2], shear[3][2], .0),
-                vec4.new(shear[1][3], shear[2][3], shear[3][3], .0),
+                vec4.new(scalex * shear[1][1], scaley * shear[2][1], scalez * shear[3][1], .0),
+                vec4.new(scalex * shear[1][2], scaley * shear[2][2], scalez * shear[3][2], .0),
+                vec4.new(scalex * shear[1][3], scaley * shear[2][3], scalez * shear[3][3], .0),
                 vec4.new(0, offsety, offsetz, 1.0)
             )
         end

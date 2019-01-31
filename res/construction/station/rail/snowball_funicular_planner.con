@@ -21,6 +21,13 @@ local function createParams()
         values = {_("snowball_funicular_helper_off"), "1x", "2x", "4x", "8x", "16x"},
         defaultIndex = 0
     }
+
+    params[#params + 1] = {
+        key = "isstation",
+        name = _("isstation"),
+        values = {"jop", "ne"},
+        defaultIndex = 1
+    }
  
     params[#params + 1] = {
         key = "snowball_funicular_length",

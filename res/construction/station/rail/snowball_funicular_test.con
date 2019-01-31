@@ -1,0 +1,71 @@
+function data()
+    return {
+        type = "RAIL_STATION",
+        description = {
+            name = _("Truck station"),
+            description = _("Truck station with two cargo terminals.")
+        },
+        categories = {"snowball_funicular"},
+        availability = {
+            yearFrom = 244,
+            yearTo = 245
+        },
+        order = 1977208010,
+        params = {},
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terminalGroups = {}
+            }
+
+            result.edgeLists = {        
+                {
+                    type = "TRACK",
+                    params = {
+                        type = "standard.lua",
+                        catenary = true
+                    },
+                    edges = {
+                        {{0, -10, 0}, {0, 10, 0}},
+                        {{0, 0, 0}, {0, 10, 0}},
+                        {{0, 0, 0}, {0, 10, 0}},
+                        {{0, 10, 0}, {0, 10, 0}}
+                    },
+                    snapNodes = {0, 3},
+                },        
+                {
+                    type = "STREET",
+                    params = {
+                        type = "new_small.lua",
+                        tramTrackType = "NO"
+                    },
+                    edges = {
+                        {{-12, 0, 0}, {4, 0, 0}},
+                        {{-8, 0, 0}, {4, 0, 0}}
+                    },
+                    snapNodes = {0}
+                },
+               
+            }
+
+            local terminals = {}
+            terminals[#terminals + 1] = {#result.models, 0}
+
+            result.models[#result.models + 1] = {
+                id = "snowball_funicular/snowball_funicular_terminal.mdl",
+                transf = {2, 0, 0, 0, 0, 10, 0, 0, 0, 0, 1, 0, -4, 0, 0, 1}
+            }
+
+            result.terminalGroups[#result.terminalGroups + 1] = {terminals = terminals, vehicleNodeOverride = 1}
+
+            result.models[#result.models + 1] = {
+                id = "snowball_funicular/snowball_funicular_terminal_connector.mdl",
+                transf = {0.4, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -6, 0, 0, 1}
+            }
+
+            
+
+            return result
+        end
+    }
+end
