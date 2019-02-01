@@ -54,6 +54,7 @@ function data()
 		snowball_funicular_rack = "Zahnstange",
 		snowball_funicular_rack_yes = "Ja",
 		snowball_funicular_rack_no = "Nein",
+		snowball_funicular_offset_x = "\n======= X - Versatz =======",
 		snowball_funicular_offset_y = "\n======= Y - Versatz =======",
 		snowball_funicular_offset_z = "\n======= Z - Versatz =======",
 		snowball_funicular_distance_10 = "10 m",
@@ -71,8 +72,12 @@ function data()
 		snowball_funicular_sloper_mode_drop = "Ablegen",
 		snowball_funicular_sloper_slope_mode = "Transformation",
 		snowball_funicular_sloper_slope_mode_rotate = "rotieren",
-		snowball_funicular_sloper_slope_mode_shear = "strecken"
-		
+		snowball_funicular_sloper_slope_mode_shear = "strecken",		
+		snowball_funicular_sloper_rotate_z = "\n====== Z - Rotation ======",
+		snowball_funicular_sloper_rotate_y = "\n====== Y - Rotation ======",
+		snowball_funicular_beams = "Balken",
+		snowball_funicular_beams_description = "Verschiedene Balken zum freien Platzieren",
+		snowball_funicular_texture = "Textur"
 
 	},
 	en = {
@@ -129,6 +134,7 @@ function data()
 		snowball_funicular_rack = "rack",
 		snowball_funicular_rack_yes = "yes",
 		snowball_funicular_rack_no = "no",
+		snowball_funicular_offset_x = "\n======= X - offset =======",
 		snowball_funicular_offset_y = "\n======= Y - offset =======",
 		snowball_funicular_offset_z = "\n======= Z - offset =======",
 		snowball_funicular_distance_10 = "10 m",
@@ -146,7 +152,12 @@ function data()
 		snowball_funicular_sloper_mode_drop = "discard",
 		snowball_funicular_sloper_slope_mode = "transformation",
 		snowball_funicular_sloper_slope_mode_rotate = "rotation",
-		snowball_funicular_sloper_slope_mode_shear = "shear"
+		snowball_funicular_sloper_slope_mode_shear = "shear",		
+		snowball_funicular_sloper_rotate_z = "\n====== Z - rotation ======",
+		snowball_funicular_sloper_rotate_y = "\n====== Y - rotation ======",
+		snowball_funicular_beams = "Beams",
+		snowball_funicular_beams_description = "Different beams for free placement",
+		snowball_funicular_texture = "Texture"
 	},
 }
 end

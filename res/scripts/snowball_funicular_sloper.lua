@@ -11,6 +11,7 @@ sloper.pickMode = 0
 sloper.dropMode = 1
 sloper.hideMode = 2
 sloper.signs = {1, -1}
+sloper.subscales = {0.0, 0.2, 0.4, 0.5, 0.6, 0.8}
 sloper.slopeRotate = 0
 sloper.slopeShear = 1
 
@@ -22,7 +23,7 @@ sloper.pickerId = "asset/snowball_funicular_picker.mdl"
 sloper.whitePickerId = "snowball_funicular/snowball_funicular_picker_white.mdl"
 sloper.greenPickerId = "snowball_funicular/snowball_funicular_picker_green.mdl"
 
-function sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley, scalez)
+function sloper.pick(result, slope, slopeMode, roty, rotz, offsetx, offsety, offsetz, scalex, scaley, scalez)
     local built =
         planner.updateEntityLists(
         {
@@ -39,7 +40,7 @@ function sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley,
 
     if built then
         sloper.model = sloper.searchModel()
-                
+
         for i = 1, #sloper.pickers do
             if game.interface.getEntity(sloper.pickers[i].id) then
                 game.interface.bulldoze(sloper.pickers[i].id)
@@ -47,23 +48,40 @@ function sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley,
         end
     end
 
-    print("slopeMode: "..slopeMode)
-    print("slope: "..slope)
-
     if sloper.model then
-        local transform =
-            transf.scaleRotZYXTransl({x = scalex, y = scaley, z = scalez},{x = 0, y = math.atan((slope or 0)), z = 0}, {x = 0, y = offsety, z = offsetz})
+        local mat
 
-        if slopeMode == sloper.slopeShear then            
-            local shear = mat3.affine({1, 0, 0}, {0, 1, 0}, {0, 0, 1}, vec3.normalize({1, 0, -(slope or 0)}), {0, 1, 0}, {0, 0, 1})
-            transform =
-                transf.new(
-                vec4.new(scalex * shear[1][1], scaley * shear[2][1], scalez * shear[3][1], .0),
-                vec4.new(scalex * shear[1][2], scaley * shear[2][2], scalez * shear[3][2], .0),
-                vec4.new(scalex * shear[1][3], scaley * shear[2][3], scalez * shear[3][3], .0),
-                vec4.new(0, offsety, offsetz, 1.0)
+        if slopeMode == sloper.slopeShear then
+            mat =
+                mat3.mul( mat3.rotZ(rotz),
+                mat3.mul( mat3.rotY(roty),
+                mat3.mul(
+                    mat3.affine(
+                        {1, 0, 0},
+                        {0, 1, 0},
+                        {0, 0, 1},
+                        vec3.normalize({1, 0, -(slope or 0)}),
+                        {0, 1, 0},
+                        {0, 0, 1}
+                    ),
+                    mat3.scale(scalex, scaley, scalez)
+                )))
+        else
+            mat =
+                mat3.mul( mat3.rotZ(rotz),
+                mat3.mul( mat3.rotY(roty),
+                mat3.mul( mat3.rotY(math.atan(slope or 0)), mat3.scale(scalex, scaley, scalez)))
             )
         end
+
+        local transform =
+            transf.new(
+            vec4.new(mat[1][1], mat[2][1], mat[3][1], .0),
+            vec4.new(mat[1][2], mat[2][2], mat[3][2], .0),
+            vec4.new(mat[1][3], mat[2][3], mat[3][3], .0),
+            vec4.new(offsetx, offsety, offsetz, 1.0)
+        )
+
         result.models[#result.models + 1] = {
             id = sloper.model,
             transf = transform
@@ -109,8 +127,7 @@ function sloper.searchModel()
     return nil
 end
 
-function sloper.drop(result)    
-
+function sloper.drop(result)
     sloper.model = nil
     result.models[#result.models + 1] = {
         id = "asset/snowball_funicular_finisher.mdl",
@@ -119,7 +136,6 @@ function sloper.drop(result)
 end
 
 function sloper.hide(result)
-    
     result.models[#result.models + 1] = {
         id = "asset/snowball_funicular_picker.mdl",
         transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}

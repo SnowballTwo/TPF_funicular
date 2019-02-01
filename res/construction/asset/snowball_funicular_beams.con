@@ -1,0 +1,48 @@
+local function createParams()
+    local params = {}
+
+    params[#params + 1] = {
+        key = "snowball_funicular_texture",
+        name = _("snowball_funicular_texture"),
+        values = {"1", "2", "3", "4", "5", "6", "7", "8"},
+        defaultIndex = 0
+    }
+
+    return params
+end
+
+function data()
+    return {
+        type = "ASSET_TRACK",
+        description = {
+            name = _("snowball_funicular_beams"),
+            description = _("snowball_funicular_beams_description")
+        },
+        categories = {"snowball_funicular"},
+        buildMode = "MULTI",
+        availability = {},
+        order = 1977208010,
+        skipCollision = true,
+        autoRemovable = false,
+        params = createParams(),
+        updateFn = function(params)
+            local result = {
+                models = {},
+                terrainAlignmentLists = {
+                    {
+                        type = "EQUAL",
+                        faces = {},
+                        slopeLow = 1,
+                        slopeHigh = 1
+                    }
+                }
+            }
+            result.models[#result.models + 1] = {
+                id = "asset/snowball_construction_beam_"..(params.snowball_funicular_texture + 1)..".mdl",
+                transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+            }
+
+            return result
+        end
+    }
+end

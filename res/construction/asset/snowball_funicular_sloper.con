@@ -1,8 +1,9 @@
 local sloper = require "snowball_funicular_sloper"
+local linq = require "snowball_funicular_linq"
 
 local function createParams()
     local params = {}
-
+    
     params[#params + 1] = {
         key = "snowball_funicular_sloper_mode",
         name = _("snowball_funicular_sloper_mode"),
@@ -31,6 +32,54 @@ local function createParams()
         key = "snowball_funicular_sloper_slope_mode",
         name = _("snowball_funicular_sloper_slope_mode"),
         values = {_("snowball_funicular_sloper_slope_mode_rotate"), _("snowball_funicular_sloper_slope_mode_shear")},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_rotate_y_sign",
+        name = _("snowball_funicular_sloper_rotate_y"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_rotate_y",
+        name = _(""),
+        values = {"0", "45", "90", "135", "180"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_rotate_z_sign",
+        name = _("snowball_funicular_sloper_rotate_z"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_sloper_rotate_z",
+        name = _(""),
+        values = {"0", "45", "90", "135", "180"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_x_sign",
+        name = _("snowball_funicular_offset_x"),
+        values = {"+", "-"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_x_10",
+        name = _("snowball_funicular_distance_10"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_x_1",
+        name = _("snowball_funicular_distance_1"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
+        defaultIndex = 0
+    }
+    params[#params + 1] = {
+        key = "snowball_funicular_offset_x_01",
+        name = _("snowball_funicular_distance_01"),
+        values = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"},
         defaultIndex = 0
     }
     params[#params + 1] = {
@@ -97,7 +146,7 @@ local function createParams()
     params[#params + 1] = {
         key = "snowball_funicular_scale_x_01",
         name = _(""),
-        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        values = linq.select(sloper.subscales, tostring),
         defaultIndex = 0
     }
 
@@ -116,7 +165,7 @@ local function createParams()
     params[#params + 1] = {
         key = "snowball_funicular_scale_y_01",
         name = _(""),
-        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        values = linq.select(sloper.subscales, tostring),
         defaultIndex = 0
     }
 
@@ -135,7 +184,7 @@ local function createParams()
     params[#params + 1] = {
         key = "snowball_funicular_scale_z_01",
         name = _(""),
-        values = {"0", "0.2", "0.4", "0.6", "0.8"},
+        values = linq.select(sloper.subscales, tostring),
         defaultIndex = 0
     }
 
@@ -176,6 +225,15 @@ function data()
 
             local slopeMode = params.snowball_funicular_sloper_slope_mode or 0
 
+            local rotz = sloper.signs[(params.snowball_funicular_sloper_rotate_z_sign or 0) + 1] * 0.25 * math.pi * (params.snowball_funicular_sloper_rotate_z or 0)
+            local roty = sloper.signs[(params.snowball_funicular_sloper_rotate_y_sign or 0) + 1] * 0.25 * math.pi * (params.snowball_funicular_sloper_rotate_y or 0)
+
+            local offsetx =
+            sloper.signs[(params.snowball_funicular_offset_x_sign or 0) + 1] *
+            (10 * (params.snowball_funicular_offset_x_10 or 0) + 1 * (params.snowball_funicular_offset_x_1 or 0) +
+                0.1 * (params.snowball_funicular_offset_x_01 or 0))
+
+
             local offsety =
                 sloper.signs[(params.snowball_funicular_offset_y_sign or 0) + 1] *
                 (10 * (params.snowball_funicular_offset_y_10 or 0) + 1 * (params.snowball_funicular_offset_y_1 or 0) +
@@ -188,24 +246,24 @@ function data()
 
             local scalex =
                 math.pow(
-                (params.snowball_funicular_scale_x_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_x_01 or 0),
+                (params.snowball_funicular_scale_x_1 or 0) + 1 + sloper.subscales[(params.snowball_funicular_scale_x_01 or 0) + 1],
                 sloper.signs[(params.snowball_funicular_scale_x or 0) + 1]
             )
 
             local scaley =
                 math.pow(
-                (params.snowball_funicular_scale_y_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_y_01 or 0),
+                (params.snowball_funicular_scale_y_1 or 0) + 1 + sloper.subscales[(params.snowball_funicular_scale_y_01 or 0) + 1],
                 sloper.signs[(params.snowball_funicular_scale_y or 0) + 1]
             )
 
             local scalez =
                 math.pow(
-                (params.snowball_funicular_scale_z_1 or 0) + 1 + 0.2 * (params.snowball_funicular_scale_z_01 or 0),
+                (params.snowball_funicular_scale_z_1 or 0) + 1 + sloper.subscales[(params.snowball_funicular_scale_z_01 or 0) + 1],
                 sloper.signs[(params.snowball_funicular_scale_z or 0) + 1]
             )
 
             if mode == sloper.pickMode then
-                sloper.pick(result, slope, slopeMode, offsety, offsetz, scalex, scaley, scalez)
+                sloper.pick(result, slope, slopeMode, roty, rotz, offsetx, offsety, offsetz, scalex, scaley, scalez)
             elseif mode == sloper.dropMode then
                 sloper.drop(result)
             elseif mode == sloper.hideMode then
